@@ -1,1 +1,33 @@
-{}
+{
+  "db": {
+    "name": "db",
+    "connector": "memory"
+  },
+  "redisDS": {
+    "host": "0.0.0.0",
+    "port": 6379,
+    "url": "",
+    "name": "redisDS",
+    "db": 0,
+    "connector": "redis"
+  },
+  "emailDS": {
+    "name": "emailDS",
+    "connector": "mail",
+    "transports": [
+      {
+        "type": "smtp",
+        "host": "smtp.gmail.com",
+        "secure": false,
+        "port": 587,
+        "tls": {
+          "rejectUnauthorized": false
+        },
+        "auth": {
+          "user": "hurricanc@gmail.com",
+          "pass": "09121513962alirezadelpiero"
+        }
+      }
+    ]
+  }
+}
