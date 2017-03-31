@@ -1,0 +1,173 @@
+{
+  "name": "client",
+  "base": "User",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id",
+    "realm",
+    "message",
+    "webhookURL",
+    "emailVerified",
+    "registrationStatus"
+  ],
+  "properties": {
+    "companyName": {
+      "type": "string",
+      "required": true,
+      "index": true
+    },
+    "password": {
+      "type": "string",
+      "required": true,
+      "index": true,
+      "min": 6
+    },
+    "email": {
+      "type": "string",
+      "required": true,
+      "index": true
+    },
+    "username": {
+      "type": "string",
+      "required": true,
+      "index": true
+    },
+    "time": {
+      "type": "number",
+      "required": true,
+      "index": true
+    },
+    "registrationCountry": {
+      "type": "string",
+      "required": true,
+      "index": true
+    },
+    "registrationIPAddress": {
+      "type": "string",
+      "required": true,
+      "index": true
+    },
+    "registrationStatus": {
+      "type": "string",
+      "required": false,
+      "index": false
+    },
+    "webhookURL": {
+      "type": "string",
+      "required": false,
+      "index": false
+    },
+    "message": {
+      "type": "string",
+      "required": false,
+      "index": false
+    }
+  },
+  "validations": [],
+  "relations": {
+    "account": {
+      "type": "embedsOne",
+      "model": "account",
+      "property": "accountModel",
+      "options": {
+        "validate": true,
+        "forceId": true,
+        "persistent": true
+      }
+    },
+    "campaigns": {
+      "type": "embedsMany",
+      "model": "campaign",
+      "property": "campaignList",
+      "options": {
+        "validate": true,
+        "forceId": true,
+        "persistent": true
+      }
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "founder",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "changePassword"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__account"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "DENY",
+      "property": "__create__account"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "DENY",
+      "property": "__update__account"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__destroy__account"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__get__campaigns"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__create__campaigns"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__updateById__campaigns"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__destroyById__campaigns"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__findById__campaigns"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__count__campaigns"
+    }
+  ],
+  "methods": {}
+}
