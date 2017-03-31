@@ -12,5 +12,51 @@
       "../common/mixins",
       "./mixins"
     ]
+  },
+  "User": {
+    "dataSource": "db",
+    "public": false
+  },
+  "AccessToken": {
+    "dataSource": "db",
+    "public": false
+  },
+  "ACL": {
+    "dataSource": "db",
+    "public": false
+  },
+  "RoleMapping": {
+    "dataSource": "db",
+    "public": false
+  },
+  "Role": {
+    "dataSource": "db",
+    "public": false
+  },
+  "Email": {
+    "dataSource": "emailDS"
+  },
+  "client": {
+    "dataSource": "redisDS",
+    "public": true,
+    "options": {
+      "emailVerificationRequired": true
+    }
+  },
+  "campaign": {
+    "dataSource": "redisDS",
+    "public": true
+  },
+  "subcampaign": {
+    "dataSource": "redisDS",
+    "public": true
+  },
+  "setting": {
+    "dataSource": "redisDS",
+    "public": true
+  },
+  "account": {
+    "dataSource": "redisDS",
+    "public": true
   }
 }
