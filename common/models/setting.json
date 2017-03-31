@@ -1,0 +1,57 @@
+{
+  "name": "setting",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "priority": {
+      "type": "string",
+      "required": true
+    },
+    "category": {
+      "type": "string",
+      "required": true
+    },
+    "language": {
+      "type": "string",
+      "required": true
+    },
+    "device": {
+      "type": "string",
+      "required": true
+    },
+    "os": {
+      "type": "string",
+      "required": true
+    },
+    "deviceManufacture": {
+      "type": "string",
+      "required": true
+    },
+    "dayParting": {
+      "type": "string",
+      "required": true
+    },
+    "preferences": {
+      "type": "string",
+      "required": true
+    },
+    "userLabel": {
+      "type": "string",
+      "required": true
+    },
+    "connection": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "hidden": [
+    "id"
+  ],
+  "methods": {}
+}
