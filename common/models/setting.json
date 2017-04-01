@@ -11,39 +11,53 @@
       "required": true
     },
     "category": {
-      "type": "string",
+      "type": [
+        "string"
+      ],
       "required": true
     },
     "language": {
-      "type": "string",
+      "type": [
+        "string"
+      ],
       "required": true
     },
     "device": {
-      "type": "string",
+      "type": [
+        "string"
+      ],
       "required": true
     },
     "os": {
-      "type": "string",
+      "type": [
+        "string"
+      ],
       "required": true
     },
     "deviceManufacture": {
-      "type": "string",
+      "type": [
+        "string"
+      ],
       "required": true
     },
     "dayParting": {
-      "type": "string",
+      "type": "object",
       "required": true
     },
     "preferences": {
-      "type": "string",
+      "type": "object",
       "required": true
     },
     "userLabel": {
-      "type": "string",
+      "type": [
+        "string"
+      ],
       "required": true
     },
     "connection": {
-      "type": "string",
+      "type": [
+        "string"
+      ],
       "required": true
     }
   },

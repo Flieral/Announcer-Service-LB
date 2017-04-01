@@ -1,14 +1,7 @@
-var methodDisabler = require('../../public/methodDisabler.js')
-var relationMethodPrefixes = [
-  'createChangeStream',
-  'upsertWithWhere',
-  'patchOrCreate',
-  'exists',
-  'prototype.patchAttributes'
-]
-
 module.exports = function (campaign) {
-  //methodDisabler.disableOnlyTheseMethods(placement, relationMethodPrefixes)
+  
+  // Should Add Some Validation Methods
+
   campaign.beforeRemote('prototype.__create__setting', function (ctx, modelInstance, next) {
     if (!ctx.args.options.accessToken)
       return next()

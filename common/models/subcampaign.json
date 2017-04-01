@@ -21,7 +21,7 @@
     },
     "status": {
       "type": "string",
-      "required": true
+      "required": false
     },
     "style": {
       "type": "string",
@@ -37,7 +37,7 @@
     },
     "fileURL": {
       "type": "string",
-      "required": true
+      "required": false
     }
   },
   "validations": [],

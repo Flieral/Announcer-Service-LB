@@ -8,10 +8,9 @@
   "hidden": [
     "id",
     "realm",
-    "message",
-    "webhookURL",
     "emailVerified",
-    "registrationStatus"
+    "accountModel",
+    "campaignList"
   ],
   "properties": {
     "companyName": {
@@ -49,21 +48,6 @@
       "type": "string",
       "required": true,
       "index": true
-    },
-    "registrationStatus": {
-      "type": "string",
-      "required": false,
-      "index": false
-    },
-    "webhookURL": {
-      "type": "string",
-      "required": false,
-      "index": false
-    },
-    "message": {
-      "type": "string",
-      "required": false,
-      "index": false
     }
   },
   "validations": [],

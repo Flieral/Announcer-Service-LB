@@ -6,10 +6,7 @@
     "validateUpsert": true
   },
   "hidden": [
-    "id",
-    "message",
-    "status",
-    "webhookIdentifier"
+    "id"
   ],
   "properties": {
     "budget": {
@@ -26,7 +23,7 @@
     },
     "status": {
       "type": "string",
-      "required": true
+      "required": false
     },
     "name": {
       "type": "string",
@@ -44,13 +41,9 @@
       "type": "string",
       "required": true
     },
-    "webhookIdentifier": {
-      "type": "string",
-      "required": true
-    },
     "message": {
       "type": "string",
-      "required": true
+      "required": false
     }
   },
   "validations": [],

@@ -28,8 +28,8 @@ module.exports = {
     if (input.length != whiteList.length)
       return false
 
-    for (var i = 0; i < whiteList.length; i++)
-      if (input.indexOf(whiteList[i]) <= -1)
+    for (var i = 0; i < input.length; i++)
+      if (whiteList.indexOf(input[i]) <= -1)
         return false
     
     return true

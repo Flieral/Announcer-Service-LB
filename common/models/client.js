@@ -59,7 +59,7 @@ module.exports = function (client) {
     next()
   })
 
-  client.beforeRemote('prototype.__create__publishers', function (ctx, modelInstance, next) {
+  client.beforeRemote('prototype.__create__campaigns', function (ctx, modelInstance, next) {
     if (!ctx.args.options.accessToken)
       return next()
     ctx.args.data.credit = 0
@@ -67,7 +67,7 @@ module.exports = function (client) {
     next()    
   })
 
-  client.beforeRemote('prototype.__updateById__publishers', function (ctx, modelInstance, next) {
+  client.beforeRemote('prototype.__updateById__campaigns', function (ctx, modelInstance, next) {
       if (!ctx.args.options.accessToken)
         return next()
       ctx.args.data.clientId = ctx.args.options.accessToken.userId
