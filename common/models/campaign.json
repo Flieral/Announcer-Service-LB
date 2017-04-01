@@ -6,7 +6,10 @@
     "validateUpsert": true
   },
   "hidden": [
-    "id"
+    "id",
+    "subcampaignList",
+    "message",
+    "status"
   ],
   "properties": {
     "budget": {
