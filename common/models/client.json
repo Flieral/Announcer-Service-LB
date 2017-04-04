@@ -9,7 +9,8 @@
     "id",
     "realm",
     "emailVerified",
-    "accountModel",
+    "announcerAccountModel",
+    "publisherAccountModel",
     "campaignList"
   ],
   "properties": {
