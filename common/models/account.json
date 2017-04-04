@@ -13,7 +13,7 @@
       "type": "number",
       "required": true
     },
-    "accountType": {
+    "type": {
       "type": "string",
       "required": true
     }

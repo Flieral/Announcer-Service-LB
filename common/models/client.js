@@ -39,9 +39,12 @@ module.exports = function (client) {
       ctx.args.data.password = pass1
       ctx.req.body.password = pass2
     }
-    ctx.args.data.accountModel = {}
-    ctx.args.data.accountModel.credit = 0
-    ctx.args.data.accountModel.type = 'Free'
+    ctx.args.data.announcerAccountModel = {}
+    ctx.args.data.announcerAccountModel.credit = 0
+    ctx.args.data.announcerAccountModel.type = 'Free'
+    ctx.args.data.publisherAccountModel = {}
+    ctx.args.data.publisherAccountModel.budget = 0
+    ctx.args.data.publisherAccountModel.type = 'Free'
     next()
   })
 

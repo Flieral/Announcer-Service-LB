@@ -55,7 +55,7 @@
     "account": {
       "type": "embedsOne",
       "model": "account",
-      "property": "accountModel",
+      "property": "announcerAccountModel",
       "options": {
         "validate": true,
         "forceId": true,
