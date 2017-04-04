@@ -45,6 +45,18 @@ module.exports = function (client) {
     next()
   })
 
+  client.beforeRemote('prototype.__update__account', function (ctx, modelInstance, next) {
+    if (!ctx.args.options.accessToken)
+      return next()
+
+    client.findById(ctx.req.params.id, function (err, result) {
+      if (err)
+        throw err
+      ctx.args.data.budget += result.announcerAccountModel.budget
+      next()
+    })
+  })
+
   client.beforeRemote('changePassword', function (ctx, modelInstance, next) {
     if (PRODUCTION) {
       var pass1 = utility.base64Decoding(ctx.args.data.password).toString()
