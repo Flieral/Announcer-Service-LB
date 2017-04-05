@@ -61,17 +61,14 @@ module.exports = function (campaign) {
     campaign.findById(ctx.req.params.id, function (err, result) {
       if (err)
         throw err
-      for (var i = 0; i < result.subcampaignList.length; i++) {
-        if (result.subcampaignList[i].status === statusConfig.pending)
-          result.status = status.pending
-      }
-      for (var i = 0; i < result.subcampaignList.length; i++) {
-        if (result.subcampaignList[i].status === statusConfig.suspend)
-          result.status = status.suspend
-      }
-        next()
+      for (var i = 0; i < result.subcampaignList.length; i++)
+        if (result.subcampaignList[i].status === statusConfig.pending || result.subcampaignList[i].status === statusConfig.suspend)
+          result.updateAttribute('status', result.subcampaignList[i].status, function (err, response) {
+            if (err)
+              throw err
+            next()
+          })
     })
   })
-
 
 }
