@@ -104,47 +104,63 @@ module.exports = function (client) {
       if (err)
         return next(err)
       if (result.length == 0) {
-        var whiteList = ['budget', 'endingTime', 'name', 'startStyle']
+        var whiteList = ['budget', 'beginningTime', 'endingTime', 'name', 'startStyle']
         if (utility.inputChecker(ctx.args.data, whiteList)) {
-          if (ctx.args.data.endingTime) {
-            var campaign = app.models.camapign
-            campaign.findById(ctx.req.params.fk, function (err, result) {
-              if (err)
-                throw err
-              if (!(ctx.args.data.endingTime > result.beginningTime) || !(result.beginningTime > utility.getUnixTimeStamp()))
-                next(new Error('Error in Date Times'))
-              next()
-            })
-          }
-          if (ctx.args.data.budget) {
-            client.findById(ctx.req.params.id, function (err, result) {
-              if (err)
-                throw err
-              var curBudget = 0
-              for (var i = 0; i < result.campaignList; i++)        
-                curBudget += result.campaignList[i].budget  
-              if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
-                next(new Error('Error in Budget (Account)'))
-              var campaign = app.models.camapign
-              campaign.findById(ctx.req.params.fk, function (err, result) {
+          var callbackFired = false
+          var campaign = app.models.campaign
+          campaign.findById(ctx.req.params.fk, function (err, result) {
+            if (err)
+              throw err
+            
+            if (ctx.args.data.endingTime && ctx.args.data.beginningTime) {
+              if (ctx.args.data.beginningTime < utility.getUnixTimeStamp())
+                return next(new Error('Beginning Time Can not be Less than Now'))
+              if ((ctx.args.data.endingTime - ctx.args.data.beginningTime < 604800) || (ctx.ats.data.endingTime < utility.getUnixTimeStamp()))
+                return next(new Error('Ending Time Can not be Less than Now Or Duration Problem'))
+            }
+
+            if (!ctx.args.data.endingTime && ctx.args.data.beginningTime) {
+              if (ctx.args.data.beginningTime < utility.getUnixTimeStamp())
+                return next(new Error('Beginning Time Can not be Less than Now'))
+              if (result.endingTime - ctx.args.data.beginningTime < 604800)
+                return next(new Error('Duration Problem'))  
+            }
+
+            if (ctx.args.data.endingTime && !ctx.args.data.beginningTime) {
+              if (ctx.args.data.endingTime < utility.getUnixTimeStamp())
+                return next(new Error('Ending Time Can not be Less than Now'))
+              if (ctx.args.data.endingTime - result.beginningTime < 604800)
+                return next(new Error('Duration Problem'))  
+            }
+
+            if (ctx.args.data.budget) {
+              callbackFired = true
+              client.findById(ctx.req.params.id, function (err, result) {
                 if (err)
                   throw err
+                var curBudget = 0
+                for (var i = 0; i < result.campaignList; i++)        
+                  curBudget += result.campaignList[i].budget  
+                if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
+                  return next(new Error('Error in Budget (Account)'))
                 var curCampBudget = 0
                 for (var i = 0; i < result.subcampaignList.length; i++) 
                   curCampBudget += result.subcampaignList[i].minBudget  
                 if (ctx.args.data.budget < curCampBudget)
-                  next(new Error('Error in Budget (Subcampaign)'))
-                next()
+                  return next(new Error('Error in Budget (Subcampaign)'))
+                return next()
               })
-              next()
-            })            
-          }
+            }
+
+            if (!callbackFired)
+              return next()          
+          })
         } else
-          next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
+          return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
       }
       else {
         ctx.args.data.clientId = ctx.req.params.id
-        next()
+        return next()
       }
     })
   })
