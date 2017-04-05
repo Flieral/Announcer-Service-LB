@@ -33,7 +33,7 @@ module.exports = function (client) {
       ctx.args.credentials.password = pass1
       ctx.req.body.password = pass2
     }
-    next()
+    return next()
   })
 
   client.beforeRemote('create', function (ctx, modelInstance, next) {
@@ -49,7 +49,7 @@ module.exports = function (client) {
     ctx.args.data.publisherAccountModel = {}
     ctx.args.data.publisherAccountModel.budget = 0
     ctx.args.data.publisherAccountModel.type = 'Free'
-    next()
+    return next()
   })
 
   client.beforeRemote('prototype.__update__account', function (ctx, modelInstance, next) {
@@ -60,7 +60,7 @@ module.exports = function (client) {
       if (err)
         throw err
       ctx.args.data.budget += result.announcerAccountModel.budget
-      next()
+      return next()
     })
   })
 
@@ -75,7 +75,7 @@ module.exports = function (client) {
       ctx.args.data.confirmation = conf1
       ctx.req.body.confirmation = conf2
     }
-    next()
+    return next()
   })
 
   client.beforeRemote('prototype.__create__campaigns', function (ctx, modelInstance, next) {
@@ -86,7 +86,7 @@ module.exports = function (client) {
     ctx.args.data.status = statusJson.pending
     ctx.args.data.message = 'Campaign Pending Approval'
     if (!(ctx.args.data.endingTime > ctx.args.data.beginningTime) || !(ctx.args.data.beginningTime > utility.getUnixTimeStamp()))
-      next(new Error('Error in Date Times'))
+      return next(new Error('Error in Date Times'))
     client.findById(ctx.req.params.id, function (err, result) {
       if (err)
         throw err
@@ -94,8 +94,8 @@ module.exports = function (client) {
       for (var i = 0; i < result.campaignList; i++)        
         curBudget += result.campaignList[i].budget  
       if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
-        next(new Error('Error in Budget'))
-      next()
+        return next(new Error('Error in Budget'))
+      return next()
     })
   })
 
@@ -168,9 +168,9 @@ module.exports = function (client) {
   client.beforeRemote('replaceById', function (ctx, modelInstance, next) {
     var whiteList = ['companyName']
     if (utility.inputChecker(ctx.args.data, whiteList))
-      next()
+      return next()
     else
-      next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
+      return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
   })
 
   // Change Password Remote Method 

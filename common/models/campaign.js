@@ -15,7 +15,7 @@ module.exports = function (campaign) {
       return next()
     ctx.args.data.clientId = ctx.args.options.accessToken.userId
     ctx.args.data.status = statusConfig.pending
-    next()
+    return next()
   })
 
   campaign.beforeRemote('prototype.__updateById__subcampaigns', function (ctx, modelInstance, next) {
@@ -33,13 +33,13 @@ module.exports = function (campaign) {
               for (var i = 0; i < result.subcampaignList.length; i++)
                 subBudget += result.subcampaignList[i].minBudget
               if (ctx.args.data.minBudget + subBudget > result.budget)
-                next(new Error('Error in Budget (Campaign)'))
-              next()
+                return next(new Error('Error in Budget (Campaign)'))
+              return next()
             })
           }
         } else
-          next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
-        next()
+          return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
+        return next()
       }
     })
   })
@@ -52,7 +52,7 @@ module.exports = function (campaign) {
       result.updateAttribute('status', statusConfig.pending, function (err, response) {
         if (err)
           throw err
-        next()
+        return next()
       })
     })
   })
@@ -73,7 +73,7 @@ module.exports = function (campaign) {
       result.updateAttribute('status', result.subcampaignList[i].status, function (err, response) {
         if (err)
           throw err
-        next()
+        return next()
       })
     })
   })
