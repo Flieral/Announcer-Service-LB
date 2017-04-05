@@ -36,10 +36,6 @@
       "type": "string",
       "required": true
     },
-    "settingStyle": {
-      "type": "string",
-      "required": true
-    },
     "mediaStyle": {
       "type": "string",
       "required": true

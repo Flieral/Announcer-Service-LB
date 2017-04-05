@@ -13,6 +13,10 @@ var relationMethodPrefixes = [
 ]
 
 var countryList = require('../../config/country.json')
+var statusJson = require('../../config/status.json')
+
+var app = require('../../server/server')
+var roleManager = require('../../public/roleManager')
 
 module.exports = function (client) {
 
@@ -79,22 +83,78 @@ module.exports = function (client) {
       return next()
     ctx.args.data.credit = 0
     ctx.args.data.clientId = ctx.args.options.accessToken.userId
-    next()    
+    ctx.args.data.status = statusJson.pending
+    ctx.args.data.message = 'Campaign Pending Approval'
+    if (!(ctx.args.data.endingTime > ctx.args.data.beginningTime) || !(ctx.args.data.beginningTime > utility.getUnixTimeStamp()))
+      next(new Error('Error in Date Times'))
+    client.findById(ctx.req.params.id, function (err, result) {
+      if (err)
+        throw err
+      var curBudget = 0
+      for (var i = 0; i < result.campaignList; i++)        
+        curBudget += result.campaignList[i].budget  
+      if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
+        next(new Error('Error in Budget'))
+      next()
+    })
   })
 
   client.beforeRemote('prototype.__updateById__campaigns', function (ctx, modelInstance, next) {
-      if (!ctx.args.options.accessToken)
-        return next()
-      ctx.args.data.clientId = ctx.args.options.accessToken.userId
-      next()
+    roleManager.getRolesById(app, ctx.args.options.accessToken.userId, function (err, result) {
+      if (err)
+        return next(err)
+      if (result.length == 0) {
+        var whiteList = ['budget', 'endingTime', 'name', 'startStyle']
+        if (utility.inputChecker(ctx.args.data, whiteList)) {
+          if (ctx.args.data.endingTime) {
+            var campaign = app.models.camapign
+            campaign.findById(ctx.req.params.fk, function (err, result) {
+              if (err)
+                throw err
+              if (!(ctx.args.data.endingTime > result.beginningTime) || !(result.beginningTime > utility.getUnixTimeStamp()))
+                next(new Error('Error in Date Times'))
+              next()
+            })
+          }
+          if (ctx.args.data.budget) {
+            client.findById(ctx.req.params.id, function (err, result) {
+              if (err)
+                throw err
+              var curBudget = 0
+              for (var i = 0; i < result.campaignList; i++)        
+                curBudget += result.campaignList[i].budget  
+              if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
+                next(new Error('Error in Budget (Account)'))
+              var campaign = app.models.camapign
+              campaign.findById(ctx.req.params.fk, function (err, result) {
+                if (err)
+                  throw err
+                var curCampBudget = 0
+                for (var i = 0; i < result.subcampaignList.length; i++) 
+                  curCampBudget += result.subcampaignList[i].minBudget  
+                if (ctx.args.data.budget < curCampBudget)
+                  next(new Error('Error in Budget (Subcampaign)'))
+                next()
+              })
+              next()
+            })            
+          }
+        } else
+          next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
+      }
+      else {
+        ctx.args.data.clientId = ctx.req.params.id
+        next()
+      }
+    })
   })
 
   client.beforeRemote('replaceById', function (ctx, modelInstance, next) {
-    var whilteList = ['companyName']
-    if (utility.inputChecker(ctx.args.data, whilteList))
+    var whiteList = ['companyName']
+    if (utility.inputChecker(ctx.args.data, whiteList))
       next()
     else
-      next(new Error('White List Error! Allowed Parameters: ' + whilteList.toString()))
+      next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
   })
 
   // Change Password Remote Method 
