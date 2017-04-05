@@ -16,6 +16,12 @@
       ],
       "required": true
     },
+    "country": {
+      "type": [
+        "string"
+      ],
+      "required": true
+    },
     "language": {
       "type": [
         "string"
@@ -29,12 +35,6 @@
       "required": true
     },
     "os": {
-      "type": [
-        "string"
-      ],
-      "required": true
-    },
-    "deviceManufacture": {
       "type": [
         "string"
       ],
