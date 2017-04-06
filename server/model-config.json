@@ -55,7 +55,7 @@
     "dataSource": "redisDS",
     "public": true
   },
-  "account": {
+  "announcerAccount": {
     "dataSource": "redisDS",
     "public": true
   }

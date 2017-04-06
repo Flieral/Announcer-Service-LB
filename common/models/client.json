@@ -55,7 +55,7 @@
   "relations": {
     "account": {
       "type": "embedsOne",
-      "model": "account",
+      "model": "announcerAccount",
       "property": "announcerAccountModel",
       "options": {
         "validate": true,
@@ -97,25 +97,25 @@
       "principalType": "ROLE",
       "principalId": "$owner",
       "permission": "ALLOW",
-      "property": "__get__account"
+      "property": "__get__announcerAccount"
     },
     {
       "principalType": "ROLE",
       "principalId": "$owner",
       "permission": "DENY",
-      "property": "__create__account"
+      "property": "__create__announcerAccount"
     },
     {
       "principalType": "ROLE",
       "principalId": "$owner",
       "permission": "DENY",
-      "property": "__update__account"
+      "property": "__update__announcerAccount"
     },
     {
       "principalType": "ROLE",
       "principalId": "$owner",
       "permission": "ALLOW",
-      "property": "__destroy__account"
+      "property": "__destroy__announcerAccount"
     },
     {
       "principalType": "ROLE",

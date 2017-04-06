@@ -44,15 +44,15 @@ module.exports = function (client) {
       ctx.req.body.password = pass2
     }
     ctx.args.data.announcerAccountModel = {}
-    ctx.args.data.announcerAccountModel.credit = 0
+    ctx.args.data.announcerAccountModel.budget = 0
     ctx.args.data.announcerAccountModel.type = 'Free'
     ctx.args.data.publisherAccountModel = {}
-    ctx.args.data.publisherAccountModel.budget = 0
+    ctx.args.data.publisherAccountModel.credit = 0
     ctx.args.data.publisherAccountModel.type = 'Free'
     return next()
   })
 
-  client.beforeRemote('prototype.__update__account', function (ctx, modelInstance, next) {
+  client.beforeRemote('prototype.__update__announcerAccount', function (ctx, modelInstance, next) {
     if (!ctx.args.options.accessToken)
       return next()
 
