@@ -17,21 +17,19 @@ module.exports = function (campaign) {
       return next()
     var whiteList = ['minBudget', 'name', 'style', 'plan', 'price']
     if (utility.inputChecker(ctx.args.data, whiteList)) {
-      if (ctx.args.data.minBudget) {
-        campaign.findById(ctx.req.params.id, function (err, result) {
-          if (err)
-            throw err
-          var subBudget = 0
-          for (var i = 0; i < result.subcampaignList.length; i++)
-            subBudget += result.subcampaignList[i].minBudget
-          if (ctx.args.data.minBudget + subBudget > result.budget)
-            return next(new Error('Error in Budget (Subcampaign)'))
-          ctx.args.data.clientId = ctx.args.options.accessToken.userId
-          ctx.args.data.status = statusConfig.pending
-          return next()
-        })
+      campaign.findById(ctx.req.params.id, function (err, result) {
+        if (err)
+          throw err
+        var subBudget = 0
+        for (var i = 0; i < result.subcampaignList.length; i++)
+          subBudget += result.subcampaignList[i].minBudget
+        if (ctx.args.data.minBudget + subBudget > result.budget)
+          return next(new Error('Error in Budget (Subcampaign)'))
+        ctx.args.data.clientId = ctx.args.options.accessToken.userId
+        ctx.args.data.status = statusConfig.pending
         return next()
-      }
+      })
+      return next()
     } else
         return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
   })
