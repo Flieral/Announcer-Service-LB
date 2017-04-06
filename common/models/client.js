@@ -82,11 +82,11 @@ module.exports = function (client) {
   client.beforeRemote('prototype.__create__campaigns', function (ctx, modelInstance, next) {
     if (!ctx.args.options.accessToken)
       return next()
-    ctx.args.data.credit = 0
+    ctx.args.data.budget = 0
     ctx.args.data.clientId = ctx.args.options.accessToken.userId
     ctx.args.data.status = statusJson.pending
     ctx.args.data.message = 'Campaign Pending Approval'
-    if (!(ctx.args.data.endingTime > ctx.args.data.beginningTime) || !(ctx.args.data.beginningTime > utility.getUnixTimeStamp()))
+    if (!(ctx.args.data.endingTime > ctx.args.data.beginningTime + 604800000) || !(ctx.args.data.beginningTime > utility.getUnixTimeStamp()))
       return next(new Error('Error in Date Times'))
     client.findById(ctx.req.params.id, function (err, result) {
       if (err)
@@ -116,21 +116,21 @@ module.exports = function (client) {
             if (ctx.args.data.endingTime && ctx.args.data.beginningTime) {
               if (ctx.args.data.beginningTime < utility.getUnixTimeStamp())
                 return next(new Error('Beginning Time Can not be Less than Now'))
-              if ((ctx.args.data.endingTime - ctx.args.data.beginningTime < 604800) || (ctx.ats.data.endingTime < utility.getUnixTimeStamp()))
+              if ((ctx.args.data.endingTime - ctx.args.data.beginningTime < 604800000) || (ctx.ats.data.endingTime < utility.getUnixTimeStamp()))
                 return next(new Error('Ending Time Can not be Less than Now Or Duration Problem'))
             }
 
             if (!ctx.args.data.endingTime && ctx.args.data.beginningTime) {
               if (ctx.args.data.beginningTime < utility.getUnixTimeStamp())
                 return next(new Error('Beginning Time Can not be Less than Now'))
-              if (result.endingTime - ctx.args.data.beginningTime < 604800)
+              if (result.endingTime - ctx.args.data.beginningTime < 604800000)
                 return next(new Error('Duration Problem'))  
             }
 
             if (ctx.args.data.endingTime && !ctx.args.data.beginningTime) {
               if (ctx.args.data.endingTime < utility.getUnixTimeStamp())
                 return next(new Error('Ending Time Can not be Less than Now'))
-              if (ctx.args.data.endingTime - result.beginningTime < 604800)
+              if (ctx.args.data.endingTime - result.beginningTime < 604800000)
                 return next(new Error('Duration Problem'))  
             }
 
