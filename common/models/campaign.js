@@ -1,4 +1,4 @@
-var statusConfig = require('../../config/subcampaignStatus')
+var statusConfig = require('../../config/status')
 var app = require('../../server/server')
 var roleManager = require('../../public/roleManager')
 var utility = require('../../public/utility')

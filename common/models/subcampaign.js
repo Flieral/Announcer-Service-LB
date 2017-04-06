@@ -1,7 +1,7 @@
 module.exports = function (subcampaign) {
   
   var subPlan = require('../../config/subPlan')
-  var subStyle = require('../../config/planStyle')
+  var subStyle = require('../../config/subStyle')
 
   subcampaign.validatesInclusionOf('style', {in: subStyle})
   subcampaign.validatesInclusionOf('plan', {in: subPlan})
@@ -16,7 +16,6 @@ module.exports = function (subcampaign) {
   subcampaign.beforeRemote('prototype.__updateById__setting', function (ctx, modelInstance, next) {
     if (!ctx.args.options.accessToken)
       return next()
-    ctx.args.data.clientId = ctx.args.options.accessToken.userId
     return next()
   })
 }
