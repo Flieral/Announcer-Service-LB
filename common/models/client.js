@@ -23,8 +23,11 @@ module.exports = function (client) {
 
   methodDisabler.disableOnlyTheseMethods(client, relationMethodPrefixes)
 
-  client.validatesLengthOf('password', {min: 6})
-  client.validatesInclusionOf('registrationCountry', {in: countryList})
+  client.validatesLengthOf('password', {
+    min: 6
+  })
+  client.validatesInclusionOf('registrationCountry', { in: countryList
+  })
 
   // Decrypt Password for Front/Back Communications
   client.beforeRemote('login', function (ctx, modelInstance, next) {
@@ -44,13 +47,19 @@ module.exports = function (client) {
       ctx.args.data.password = pass1
       ctx.req.body.password = pass2
     }
-    ctx.args.data.announcerAccountModel = {}
-    ctx.args.data.announcerAccountModel.budget = 0
-    ctx.args.data.announcerAccountModel.type = 'Free'
-    ctx.args.data.publisherAccountModel = {}
-    ctx.args.data.publisherAccountModel.credit = 0
-    ctx.args.data.publisherAccountModel.type = 'Free'
-    return next()
+    var whiteList = ['companyName', 'email', 'username', 'password', 'time', 'registrationCountry', 'registrationIPAddress']
+    if (!utility.inputChecker(ctx.args.data, whiteList))
+      return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
+    else {
+      ctx.args.data.clientId = ctx.req.params.id
+      ctx.args.data.announcerAccountModel = {}
+      ctx.args.data.announcerAccountModel.budget = 0
+      ctx.args.data.announcerAccountModel.type = 'Free'
+      ctx.args.data.publisherAccountModel = {}
+      ctx.args.data.publisherAccountModel.credit = 0
+      ctx.args.data.publisherAccountModel.type = 'Free'
+      return next()
+    }
   })
 
   client.beforeRemote('prototype.__update__announcerAccount', function (ctx, modelInstance, next) {
@@ -82,22 +91,26 @@ module.exports = function (client) {
   client.beforeRemote('prototype.__create__campaigns', function (ctx, modelInstance, next) {
     if (!ctx.args.options.accessToken)
       return next()
-    ctx.args.data.budget = 0
-    ctx.args.data.clientId = ctx.args.options.accessToken.userId
-    ctx.args.data.status = statusJson.pending
-    ctx.args.data.message = 'Campaign Pending Approval'
-    if (!(ctx.args.data.endingTime > ctx.args.data.beginningTime + 604800000) || !(ctx.args.data.beginningTime > utility.getUnixTimeStamp()))
-      return next(new Error('Error in Date Times'))
-    client.findById(ctx.req.params.id, function (err, result) {
-      if (err)
-        throw err
-      var curBudget = 0
-      for (var i = 0; i < result.campaignList; i++)        
-        curBudget += result.campaignList[i].budget  
-      if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
-        return next(new Error('Error in Budget'))
-      return next()
-    })
+    var whiteList = ['budget', 'beginningTime', 'endingTime', 'name', 'startStyle', 'mediaStyle']
+    if (!utility.inputChecker(ctx.args.data, whiteList))
+      return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
+    else {
+      ctx.args.data.clientId = ctx.args.options.accessToken.userId
+      ctx.args.data.status = statusJson.pending
+      ctx.args.data.message = 'Campaign Pending Approval'
+      if (!(ctx.args.data.endingTime > ctx.args.data.beginningTime + 604800000) || !(ctx.args.data.beginningTime > utility.getUnixTimeStamp()))
+        return next(new Error('Error in Date Times'))
+      client.findById(ctx.req.params.id, function (err, result) {
+        if (err)
+          throw err
+        var curBudget = 0
+        for (var i = 0; i < result.campaignList; i++)
+          curBudget += result.campaignList[i].budget
+        if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
+          return next(new Error('Error in Budget'))
+        return next()
+      })
+    }
   })
 
   client.beforeRemote('prototype.__updateById__campaigns', function (ctx, modelInstance, next) {
@@ -112,7 +125,7 @@ module.exports = function (client) {
           campaign.findById(ctx.req.params.fk, function (err, result) {
             if (err)
               throw err
-            
+
             if (ctx.args.data.endingTime && ctx.args.data.beginningTime) {
               if (ctx.args.data.beginningTime < utility.getUnixTimeStamp())
                 return next(new Error('Beginning Time Can not be Less than Now'))
@@ -124,14 +137,14 @@ module.exports = function (client) {
               if (ctx.args.data.beginningTime < utility.getUnixTimeStamp())
                 return next(new Error('Beginning Time Can not be Less than Now'))
               if (result.endingTime - ctx.args.data.beginningTime < 604800000)
-                return next(new Error('Duration Problem'))  
+                return next(new Error('Duration Problem'))
             }
 
             if (ctx.args.data.endingTime && !ctx.args.data.beginningTime) {
               if (ctx.args.data.endingTime < utility.getUnixTimeStamp())
                 return next(new Error('Ending Time Can not be Less than Now'))
               if (ctx.args.data.endingTime - result.beginningTime < 604800000)
-                return next(new Error('Duration Problem'))  
+                return next(new Error('Duration Problem'))
             }
 
             if (ctx.args.data.budget) {
@@ -140,13 +153,13 @@ module.exports = function (client) {
                 if (err)
                   throw err
                 var curBudget = 0
-                for (var i = 0; i < result.campaignList; i++)        
-                  curBudget += result.campaignList[i].budget  
+                for (var i = 0; i < result.campaignList; i++)
+                  curBudget += result.campaignList[i].budget
                 if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
                   return next(new Error('Error in Budget (Account)'))
                 var curCampBudget = 0
-                for (var i = 0; i < result.subcampaignList.length; i++) 
-                  curCampBudget += result.subcampaignList[i].minBudget  
+                for (var i = 0; i < result.subcampaignList.length; i++)
+                  curCampBudget += result.subcampaignList[i].minBudget
                 if (ctx.args.data.budget < curCampBudget)
                   return next(new Error('Error in Budget (Subcampaign)'))
                 return next()
@@ -154,12 +167,11 @@ module.exports = function (client) {
             }
 
             if (!callbackFired)
-              return next()          
+              return next()
           })
         } else
           return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
-      }
-      else {
+      } else {
         ctx.args.data.clientId = ctx.req.params.id
         return next()
       }
