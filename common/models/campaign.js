@@ -48,8 +48,11 @@ module.exports = function (campaign) {
               if (err)
                 throw err
               var subBudget = 0
-              for (var i = 0; i < result.subcampaignList.length; i++)
+              for (var i = 0; i < result.subcampaignList.length; i++){
+                if (result.subcampaignList[i].id == ctx.req.params.fk)
+                  continue
                 subBudget += result.subcampaignList[i].minBudget
+              }
               if (ctx.args.data.minBudget + subBudget > result.budget)
                 return next(new Error('Error in Budget (Campaign)'))
               return next()

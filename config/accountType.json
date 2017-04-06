@@ -1,4 +1,4 @@
-[
-  "Free",
-  "Premium"
-]
+{
+  "free": "Free",
+  "premium": "Premium"
+}

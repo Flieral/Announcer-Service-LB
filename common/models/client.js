@@ -1,6 +1,7 @@
 var config = require('../../server/config.json')
 var path = require('path')
 var utility = require('../../public/utility.js')
+var accountType = require('../../config/accountType')
 
 var PRODUCTION = false
 
@@ -51,13 +52,12 @@ module.exports = function (client) {
     if (!utility.inputChecker(ctx.args.data, whiteList))
       return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
     else {
-      ctx.args.data.clientId = ctx.req.params.id
       ctx.args.data.announcerAccountModel = {}
       ctx.args.data.announcerAccountModel.budget = 0
-      ctx.args.data.announcerAccountModel.type = 'Free'
+      ctx.args.data.announcerAccountModel.type = accountType.free
       ctx.args.data.publisherAccountModel = {}
       ctx.args.data.publisherAccountModel.credit = 0
-      ctx.args.data.publisherAccountModel.type = 'Free'
+      ctx.args.data.publisherAccountModel.type = accountType.free
       return next()
     }
   })
@@ -122,7 +122,7 @@ module.exports = function (client) {
         if (utility.inputChecker(ctx.args.data, whiteList)) {
           var callbackFired = false
           var campaign = app.models.campaign
-          campaign.findById(ctx.req.params.fk, function (err, result) {
+          campaign.findById(ctx.req.params.fk, function (err, response) {
             if (err)
               throw err
 
@@ -136,14 +136,14 @@ module.exports = function (client) {
             if (!ctx.args.data.endingTime && ctx.args.data.beginningTime) {
               if (ctx.args.data.beginningTime < utility.getUnixTimeStamp())
                 return next(new Error('Beginning Time Can not be Less than Now'))
-              if (result.endingTime - ctx.args.data.beginningTime < 604800000)
+              if (response.endingTime - ctx.args.data.beginningTime < 604800000)
                 return next(new Error('Duration Problem'))
             }
 
             if (ctx.args.data.endingTime && !ctx.args.data.beginningTime) {
               if (ctx.args.data.endingTime < utility.getUnixTimeStamp())
                 return next(new Error('Ending Time Can not be Less than Now'))
-              if (ctx.args.data.endingTime - result.beginningTime < 604800000)
+              if (ctx.args.data.endingTime - response.beginningTime < 604800000)
                 return next(new Error('Duration Problem'))
             }
 
@@ -153,12 +153,15 @@ module.exports = function (client) {
                 if (err)
                   throw err
                 var curBudget = 0
-                for (var i = 0; i < result.campaignList; i++)
+                for (var i = 0; i < result.campaignList; i++) {
+                  if (result.campaignList[i].id == response.id)
+                    continue
                   curBudget += result.campaignList[i].budget
+                }
                 if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
                   return next(new Error('Error in Budget (Account)'))
                 var curCampBudget = 0
-                for (var i = 0; i < result.subcampaignList.length; i++)
+                for (var i = 0; i < result.subcampaignList.length; i++) {}
                   curCampBudget += result.subcampaignList[i].minBudget
                 if (ctx.args.data.budget < curCampBudget)
                   return next(new Error('Error in Budget (Subcampaign)'))
