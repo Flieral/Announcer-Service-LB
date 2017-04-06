@@ -6,7 +6,6 @@
     "validateUpsert": true
   },
   "hidden": [
-    "id"
   ],
   "properties": {
     "budget": {

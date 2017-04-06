@@ -6,9 +6,7 @@
     "validateUpsert": true
   },
   "hidden": [
-    "id",
     "fileURL",
-    "status",
     "settingModel"
   ],
   "properties": {
