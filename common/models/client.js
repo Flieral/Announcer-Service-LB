@@ -103,8 +103,10 @@ module.exports = function (client) {
       client.findById(ctx.req.params.id, function (err, result) {
         if (err)
           throw err
+        if (ctx.args.data.budget == 0)
+          return next(new Error('Error in Budget (Zero)'))  
         var curBudget = 0
-        for (var i = 0; i < result.campaignList; i++)
+        for (var i = 0; i < result.campaignList.length; i++)
           curBudget += result.campaignList[i].budget
         if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
           return next(new Error('Error in Budget'))
@@ -117,7 +119,7 @@ module.exports = function (client) {
     roleManager.getRolesById(app, ctx.args.options.accessToken.userId, function (err, result) {
       if (err)
         return next(err)
-      if (result.length == 0) {
+      if (result.roles.length == 0) {
         var whiteList = ['budget', 'beginningTime', 'endingTime', 'name', 'startStyle']
         if (utility.inputChecker(ctx.args.data, whiteList)) {
           var callbackFired = false
@@ -125,7 +127,6 @@ module.exports = function (client) {
           campaign.findById(ctx.req.params.fk, function (err, response) {
             if (err)
               throw err
-
             if (ctx.args.data.endingTime && ctx.args.data.beginningTime) {
               if (ctx.args.data.beginningTime < utility.getUnixTimeStamp())
                 return next(new Error('Beginning Time Can not be Less than Now'))
@@ -153,16 +154,18 @@ module.exports = function (client) {
                 if (err)
                   throw err
                 var curBudget = 0
-                for (var i = 0; i < result.campaignList; i++) {
-                  if (result.campaignList[i].id == response.id)
+                for (var i = 0; i < result.campaignList.length; i++) {
+                  if (result.campaignList[i].id == ctx.req.params.fk)
                     continue
                   curBudget += result.campaignList[i].budget
                 }
+                if (ctx.args.data.budget == 0)
+                  return next(new Error('Error in Budget (Zero)'))
                 if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
                   return next(new Error('Error in Budget (Account)'))
                 var curCampBudget = 0
-                for (var i = 0; i < result.subcampaignList.length; i++) {}
-                  curCampBudget += result.subcampaignList[i].minBudget
+                for (var i = 0; i < response.subcampaignList.length; i++)
+                  curCampBudget += response.subcampaignList[i].minBudget
                 if (ctx.args.data.budget < curCampBudget)
                   return next(new Error('Error in Budget (Subcampaign)'))
                 return next()

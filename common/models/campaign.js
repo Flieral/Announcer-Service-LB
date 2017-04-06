@@ -20,6 +20,8 @@ module.exports = function (campaign) {
       campaign.findById(ctx.req.params.id, function (err, result) {
         if (err)
           throw err
+        if (ctx.args.data.minBudget == 0)
+          return next(new Error('Error in Budget (Zero)'))  
         var subBudget = 0
         for (var i = 0; i < result.subcampaignList.length; i++)
           subBudget += result.subcampaignList[i].minBudget
@@ -29,22 +31,25 @@ module.exports = function (campaign) {
         ctx.args.data.status = statusConfig.pending
         return next()
       })
-      return next()
     } else
         return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
   })
 
   campaign.beforeRemote('prototype.__updateById__subcampaigns', function (ctx, modelInstance, next) {
-    roleManager.getRolesById(app, ctx.args.options.accessToken.userId, function (err, result) {
+    roleManager.getRolesById(app, ctx.args.options.accessToken.userId, function (err, response) {
       if (err)
         return next(err)
-      if (result.lenght == 0) {
+      if (response.roles.length == 0) {
         var whiteList = ['minBudget', 'name', 'style', 'plan', 'price']
         if (utility.inputChecker(ctx.args.data, whiteList)) {
           if (ctx.args.data.minBudget) {
+            console.log("in before: minBudget")
             campaign.findById(ctx.req.params.id, function (err, result) {
               if (err)
                 throw err
+              console.log("in findByID")
+              if (ctx.args.data.minBudget == 0)
+                return next(new Error('Error in Budget (Zero)'))
               var subBudget = 0
               for (var i = 0; i < result.subcampaignList.length; i++){
                 if (result.subcampaignList[i].id == ctx.req.params.fk)
@@ -56,16 +61,18 @@ module.exports = function (campaign) {
               return next()
             })
           }
+          else 
+            return next()
         } else
           return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
-        return next()
       }
+      else 
+        return next()
     })
   })
 
   campaign.afterRemote('prototype.__create__subcampaigns', function (ctx, modelInstance, next) {
-    var campaignId = ctx.req.params.id
-    campaign.findById(campaignId, function (err, result) {
+    campaign.findById(ctx.ctorArgs.id, function (err, result) {
       if (err)
         throw err
       result.updateAttribute('status', statusConfig.pending, function (err, response) {
@@ -77,7 +84,7 @@ module.exports = function (campaign) {
   })
 
   campaign.afterRemote('prototype.__updateById__subcampaigns', function (ctx, modelInstance, next) {
-    campaign.findById(ctx.req.params.id, function (err, result) {
+    campaign.findById(ctx.ctorArgs.id, function (err, result) {
       if (err)
         throw err
       var status
@@ -89,7 +96,7 @@ module.exports = function (campaign) {
           break
         }
       }
-      result.updateAttribute('status', result.subcampaignList[i].status, function (err, response) {
+      result.updateAttribute('status', status, function (err, response) {
         if (err)
           throw err
         return next()
