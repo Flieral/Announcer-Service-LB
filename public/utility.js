@@ -29,5 +29,12 @@ module.exports = {
       if (whiteList.indexOf(input[i]) <= -1)
         return false
     return true
+  },
+
+  JSONIterator: function (input, validator) {
+    for (var i = 0; i < input.length; i++)
+      if (validator.indexOf(input[i]) == -1)
+        return false
+    return true
   }
-}
+}  

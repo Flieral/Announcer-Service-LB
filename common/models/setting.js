@@ -7,14 +7,46 @@ var osList = require('../../config/operatingSystem.json')
 var connectionList = require('../../config/connection.json')
 var deviceList = require('../../config/device.json')
 
+var utility = require('../../public/utility.js')
+
 module.exports = function (setting) {
 
-  setting.validatesInclusionOf('category', { in: categoryList })
-  setting.validatesInclusionOf('country', { in: countryList })
-  setting.validatesInclusionOf('userLabel', { in: userLabelList })
   setting.validatesInclusionOf('priority', { in: priorityList })
-  setting.validatesInclusionOf('language', { in: languageList })
-  setting.validatesInclusionOf('os', { in: osList })
-  setting.validatesInclusionOf('connection', { in: connectionList })
-  setting.validatesInclusionOf('device', { in: deviceList })
+
+  setting.beforeRemote('create', function (ctx, modelInstance, next) {
+    if (!utility.JSONIterator(ctx.args.data.category, categoryList))
+      next(new Error('category Validation Error'))
+    if (!utility.JSONIterator(ctx.args.data.userLabel, userLabelList))
+      next(new Error('userLabel Validation Error'))
+    if (!utility.JSONIterator(ctx.args.data.country, countryList))
+      next(new Error('country Validation Error'))
+    if (!utility.JSONIterator(ctx.args.data.language, languageList))
+      next(new Error('language Validation Error'))
+    if (!utility.JSONIterator(ctx.args.data.os, osList))
+      next(new Error('os Validation Error'))
+    if (!utility.JSONIterator(ctx.args.data.connection, deviceList))
+      next(new Error('connection Validation Error'))
+    if (!utility.JSONIterator(ctx.args.data.device, deviceList))
+      next(new Error('device Validation Error'))
+    next()
+  })
+
+  setting.beforeRemote('update', function (ctx, modelInstance, next) {
+    if (!utility.JSONIterator(ctx.args.data.category, categoryList))
+      next(new Error('category Validation Error'))
+    if (!utility.JSONIterator(ctx.args.data.userLabel, userLabelList))
+      next(new Error('userLabel Validation Error'))
+    if (!utility.JSONIterator(ctx.args.data.country, countryList))
+      next(new Error('country Validation Error'))
+    if (!utility.JSONIterator(ctx.args.data.language, languageList))
+      next(new Error('language Validation Error'))
+    if (!utility.JSONIterator(ctx.args.data.os, osList))
+      next(new Error('os Validation Error'))
+    if (!utility.JSONIterator(ctx.args.data.connection, deviceList))
+      next(new Error('connection Validation Error'))
+    if (!utility.JSONIterator(ctx.args.data.device, deviceList))
+      next(new Error('device Validation Error'))
+    next()
+  })  
+
 }
