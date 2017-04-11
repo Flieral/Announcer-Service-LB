@@ -21,32 +21,32 @@ module.exports = function (subcampaign) {
     var whiteList = ['priority', 'category', 'country', 'language', 'device', 'os', 'dayParting', 'preferences', 'userLabel', 'connection']
     if (utility.inputChecker(data, whiteList)) {
       if (!utility.JSONIterator(data.category, categoryList))
-        callback(new Error('category Validation Error'), null)
+        return callback(new Error('category Validation Error'), null)
       if (!utility.JSONIterator(data.userLabel, userLabelList))
-        callback(new Error('userLabel Validation Error'), null)
+        return callback(new Error('userLabel Validation Error'), null)
       if (!utility.JSONIterator(data.country, countryList))
-        callback(new Error('country Validation Error'), null)
+        return callback(new Error('country Validation Error'), null)
       if (!utility.JSONIterator(data.language, languageList))
-        callback(new Error('language Validation Error'), null)
+        return callback(new Error('language Validation Error'), null)
       if (!utility.JSONIterator(data.os, osList))
-        callback(new Error('os Validation Error'), null)
+        return callback(new Error('os Validation Error'), null)
       if (!utility.JSONIterator(data.connection, deviceList))
-        callback(new Error('connection Validation Error'), null)
+        return callback(new Error('connection Validation Error'), null)
       if (!utility.JSONIterator(data.device, deviceList))
-        callback(new Error('device Validation Error'), null)
-      callback(null, 'validated successfully')
+        return callback(new Error('device Validation Error'), null)
+      return callback(null, 'validated successfully')
     }
     else
-      return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))    
+      return callback(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()), null)
   }
 
   subcampaign.beforeRemote('prototype.__create__setting', function (ctx, modelInstance, next) {
     if (!ctx.args.options.accessToken)
       return next()
-    ctx.args.data.clientId = ctx.args.options.accessToken.userId
     settingValidator(ctx.args.data, function (err, result) {
       if (err)
         return next(err)
+      ctx.args.data.clientId = ctx.args.options.accessToken.userId
       return next()
     })
   })
