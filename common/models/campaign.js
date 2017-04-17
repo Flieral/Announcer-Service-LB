@@ -87,7 +87,7 @@ module.exports = function (campaign) {
     campaign.findById(ctx.ctorArgs.id, function (err, result) {
       if (err)
         throw err
-      var status
+      var status = statusConfig.approved
       for (var i = 0; i < result.subcampaignList.length; i++) {
         if (result.subcampaignList[i].status === statusConfig.pending)
           status = statusConfig.pending
