@@ -16,6 +16,7 @@
     "loopback": "^3.0.0",
     "loopback-boot": "^2.6.5",
     "loopback-component-explorer": "^4.0.0",
+    "loopback-connector-mongodb": "^1.18.1",
     "loopback-connector-redis": "^0.1.0",
     "loopback-datasource-juggler": "^3.2.0",
     "redis": "^2.7.1",

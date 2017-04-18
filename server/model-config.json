@@ -37,26 +37,26 @@
     "dataSource": "emailDS"
   },
   "client": {
-    "dataSource": "redisDS",
+    "dataSource": "mongoDs",
     "public": true,
     "options": {
       "emailVerificationRequired": true
     }
   },
   "campaign": {
-    "dataSource": "redisDS",
+    "dataSource": "mongoDs",
     "public": true
   },
   "subcampaign": {
-    "dataSource": "redisDS",
+    "dataSource": "mongoDs",
     "public": true
   },
   "setting": {
-    "dataSource": "redisDS",
+    "dataSource": "mongoDs",
     "public": true
   },
   "announcerAccount": {
-    "dataSource": "redisDS",
+    "dataSource": "mongoDs",
     "public": true
   }
 }
