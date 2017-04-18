@@ -5,12 +5,13 @@ var relationMethodPrefixes = [
 ]
 
 module.exports = function (app) {
+  var mongoDs = app.dataSources.mongoDs
+
   var User = app.models.client
   var Role = app.models.Role
   var RoleMapping = app.models.RoleMapping
 
   var users = [{
-      id: 98989878,
       username: 'MrWooJ',
       email: 'CEO@Flieral.com',
       password: 'Fl13r4lAlirezaPass',
@@ -21,7 +22,6 @@ module.exports = function (app) {
       emailVerified: true
     },
     {
-      id: 98989857,
       username: 'Mohammad4x',
       email: 'CTO@Flieral.com',
       password: 'Fl13r4lMohammadPass',
@@ -32,7 +32,6 @@ module.exports = function (app) {
       emailVerified: true
     },
     {
-      id: 98989873,
       username: 'Support',
       email: 'Support@Flieral.com',
       password: 'Fl13r4lSupportPass',
@@ -44,13 +43,22 @@ module.exports = function (app) {
     }
   ]
 
-  User.replaceOrCreate(users, null, function (err, users) {
+  function createClients(cb) {
+    mongoDs.automigrate('client', function (err) {
+      if (err) return cb(err)
+      var client = app.models.client
+      client.create(users, cb)
+    })
+  }
+
+  createClients(function (err, users) {
     if (err)
-      throw err
+      console.log(err)
 
     var role1 = {
       name: 'founder'
     }
+
     Role.create(role1, function (err, role) {
       if (err)
         throw err
@@ -84,6 +92,6 @@ module.exports = function (app) {
           throw err
       })
     })
-  })
 
+  })
 }
