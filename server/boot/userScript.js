@@ -53,7 +53,7 @@ module.exports = function (app) {
 
   createClients(function (err, users) {
     if (err)
-      console.log(err)
+      throw err
 
     var role1 = {
       name: 'founder'
