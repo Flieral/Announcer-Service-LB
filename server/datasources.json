@@ -3,14 +3,6 @@
     "name": "db",
     "connector": "memory"
   },
-  "redisDS": {
-    "host": "0.0.0.0",
-    "port": 6379,
-    "url": "",
-    "name": "redisDS",
-    "db": 0,
-    "connector": "redis"
-  },
   "emailDS": {
     "name": "emailDS",
     "connector": "mail",
@@ -29,5 +21,13 @@
         }
       }
     ]
+  },
+  "mongoDs": {
+    "host": "0.0.0.0",
+    "port": 27017,
+    "url": "",
+    "database": "db",
+    "name": "mongoDs",
+    "connector": "mongodb"
   }
 }
