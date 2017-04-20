@@ -10,7 +10,8 @@
     "emailVerified",
     "announcerAccountModel",
     "publisherAccountModel",
-    "campaignList"
+    "campaignList",
+    "applicationList"
   ],
   "properties": {
     "companyName": {
