@@ -41,6 +41,34 @@ module.exports = function (client) {
     return next()
   })
 
+  client.afterRemote('login', function (ctx, modelInstance, next) {
+    roleManager.getRolesById(app, modelInstance.userId, function (err, result) {
+      if (err)
+        return next(err)
+      if (result.roles.length == 0) {
+        client.findById(modelInstance.userId, function (err, result) {
+          if (err)
+            throw err
+          if (result.clientType.indexOf('Announcer') <= -1) {
+            var oldSet = []
+            oldSet = result.clientType
+            oldSet.push('Announcer')
+            result.updateAttribute('clientType', oldSet, function (err, response) {
+              if (err)
+                throw err
+              return next()
+            })        
+          }
+          else        
+            return next()
+        })
+      }
+      else 
+        return next()
+    })
+  })
+
+
   client.beforeRemote('create', function (ctx, modelInstance, next) {
     if (PRODUCTION) {
       var pass1 = utility.base64Decoding(ctx.args.data.password).toString()
@@ -58,6 +86,7 @@ module.exports = function (client) {
       ctx.args.data.publisherAccountModel = {}
       ctx.args.data.publisherAccountModel.credit = 0
       ctx.args.data.publisherAccountModel.type = accountType.free
+      ctx.args.data.clientType = []
       return next()
     }
   })
