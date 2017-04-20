@@ -95,8 +95,8 @@
     },
     {
       "principalType": "ROLE",
-      "principalId": "$everyone",
-      "permission": "Deny",
+      "principalId": "admin",
+      "permission": "ALLOW",
       "property": "replaceById"
     },
     {
