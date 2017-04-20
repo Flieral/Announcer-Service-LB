@@ -1,9 +1,3 @@
-var methodDisabler = require('../../public/methodDisabler.js')
-var relationMethodPrefixes = [
-  'login',
-  'logout'
-]
-
 module.exports = function (app) {
   var mongoDs = app.dataSources.mongoDs
 
@@ -43,18 +37,7 @@ module.exports = function (app) {
     }
   ]
 
-  function createClients(cb) {
-    mongoDs.automigrate('client', function (err) {
-      if (err) return cb(err)
-      var client = app.models.client
-      client.create(users, cb)
-    })
-  }
-
-  createClients(function (err, users) {
-    if (err)
-      throw err
-
+  function createRoles(users) {
     var role1 = {
       name: 'founder'
     }
@@ -92,6 +75,21 @@ module.exports = function (app) {
           throw err
       })
     })
+  }
 
+  User.create(users, function (err, users) {
+    if (err) {
+      User.find({
+        where: {
+          'companyName': 'Flieral'
+        }
+      }, function (err, users) {
+        if (err)
+          throw err
+        createRoles(users)
+      })
+    } else
+      createRoles(users)
   })
+
 }
