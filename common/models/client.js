@@ -134,12 +134,17 @@ module.exports = function (client) {
           throw err
         if (ctx.args.data.budget == 0)
           return next(new Error('Error in Budget (Zero)'))  
-        var curBudget = 0
-        for (var i = 0; i < result.campaignList.length; i++)
-          curBudget += result.campaignList[i].budget
-        if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
-          return next(new Error('Error in Budget'))
-        return next()
+        var campaign = app.models.campaign
+        campaign.find({ where: { 'clientId': ctx.args.data.clientId } }, function (err, campaignList) {
+          if (err)
+            throw err
+          var curBudget = 0
+          for (var i = 0; i < campaignList.length; i++)
+            curBudget += campaignList[i].budget
+          if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
+            return next(new Error('Error in Budget'))
+          return next()
+        })
       })
     }
   })
@@ -182,22 +187,31 @@ module.exports = function (client) {
               client.findById(ctx.req.params.id, function (err, result) {
                 if (err)
                   throw err
-                var curBudget = 0
-                for (var i = 0; i < result.campaignList.length; i++) {
-                  if (result.campaignList[i].id == ctx.req.params.fk)
-                    continue
-                  curBudget += result.campaignList[i].budget
-                }
-                if (ctx.args.data.budget == 0)
-                  return next(new Error('Error in Budget (Zero)'))
-                if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
-                  return next(new Error('Error in Budget (Account)'))
-                var curCampBudget = 0
-                for (var i = 0; i < response.subcampaignList.length; i++)
-                  curCampBudget += response.subcampaignList[i].minBudget
-                if (ctx.args.data.budget < curCampBudget)
-                  return next(new Error('Error in Budget (Subcampaign)'))
-                return next()
+                campaign.find({ where: { 'clientId': ctx.req.params.id } }, function (err, campaignList) {
+                  if (err)
+                    throw err
+                  var curBudget = 0
+                  for (var i = 0; i < campaignList.length; i++) {
+                    if (campaignList[i].id == ctx.req.params.fk)
+                      continue
+                    curBudget += campaignList[i].budget
+                  }
+                  if (ctx.args.data.budget == 0)
+                    return next(new Error('Error in Budget (Zero)'))
+                  if (curBudget + ctx.args.data.budget > result.announcerAccountModel.budget)
+                    return next(new Error('Error in Budget (Account)'))
+                  var subcampaign = app.models.subcampaign
+                  subcampaign.find({ where: { 'campaignId': ctx.req.params.fk } }, function (err, subcampaignList) {
+                    if (err)
+                      throw err
+                    var curCampBudget = 0
+                    for (var i = 0; i < subcampaignList.length; i++)
+                      curCampBudget += subcampaignList[i].minBudget
+                    if (ctx.args.data.budget < curCampBudget)
+                      return next(new Error('Error in Budget (Subcampaign)'))
+                    return next()
+                  })
+                })
               })
             }
 

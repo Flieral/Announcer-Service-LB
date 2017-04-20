@@ -22,14 +22,21 @@ module.exports = function (campaign) {
           throw err
         if (ctx.args.data.minBudget == 0)
           return next(new Error('Error in Budget (Zero)'))  
-        var subBudget = 0
-        for (var i = 0; i < result.subcampaignList.length; i++)
-          subBudget += result.subcampaignList[i].minBudget
-        if (ctx.args.data.minBudget + subBudget > result.budget)
-          return next(new Error('Error in Budget (Subcampaign)'))
-        ctx.args.data.clientId = ctx.args.options.accessToken.userId
-        ctx.args.data.status = statusConfig.pending
-        return next()
+        
+        var subcampaign = app.models.subcampaign
+        subcampaign.find({ where: { 'campaignId': ctx.req.params.fk } }, function (err, subcampaignList) {
+          if (err)
+            throw err
+          var subBudget = 0
+          for (var i = 0; i < subcampaignList.length; i++)
+            subBudget += subcampaignList[i].minBudget
+          if (ctx.args.data.minBudget + subBudget > result.budget)
+            return next(new Error('Error in Budget (Subcampaign)'))
+          ctx.args.data.clientId = ctx.args.options.accessToken.userId
+          ctx.args.data.campaignId = ctx.args.options.accessToken.userId
+          ctx.args.data.status = statusConfig.pending
+          return next()
+        })
       })
     } else
         return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
@@ -43,22 +50,26 @@ module.exports = function (campaign) {
         var whiteList = ['minBudget', 'name', 'style', 'plan', 'price']
         if (utility.inputChecker(ctx.args.data, whiteList)) {
           if (ctx.args.data.minBudget) {
-            console.log("in before: minBudget")
             campaign.findById(ctx.req.params.id, function (err, result) {
               if (err)
                 throw err
-              console.log("in findByID")
               if (ctx.args.data.minBudget == 0)
                 return next(new Error('Error in Budget (Zero)'))
-              var subBudget = 0
-              for (var i = 0; i < result.subcampaignList.length; i++){
-                if (result.subcampaignList[i].id == ctx.req.params.fk)
-                  continue
-                subBudget += result.subcampaignList[i].minBudget
-              }
-              if (ctx.args.data.minBudget + subBudget > result.budget)
-                return next(new Error('Error in Budget (Campaign)'))
-              return next()
+
+              var subcampaign = app.models.subcampaign
+              subcampaign.find({ where: { 'campaignId': ctx.req.params.fk } }, function (err, subcampaignList) {
+                if (err)
+                  throw err
+                var subBudget = 0
+                for (var i = 0; i < subcampaignList.length; i++){
+                  if (subcampaignList[i].id == ctx.req.params.fk)
+                    continue
+                  subBudget += subcampaignList[i].minBudget
+                }
+                if (ctx.args.data.minBudget + subBudget > result.budget)
+                  return next(new Error('Error in Budget (Campaign)'))
+                return next()
+              })
             })
           }
           else 
@@ -87,19 +98,25 @@ module.exports = function (campaign) {
     campaign.findById(ctx.ctorArgs.id, function (err, result) {
       if (err)
         throw err
-      var status = statusConfig.approved
-      for (var i = 0; i < result.subcampaignList.length; i++) {
-        if (result.subcampaignList[i].status === statusConfig.pending)
-          status = statusConfig.pending
-        if (result.subcampaignList[i].status === statusConfig.suspend) {
-          status = statusConfig.suspend
-          break
-        }
-      }
-      result.updateAttribute('status', status, function (err, response) {
+      
+      var subcampaign = app.models.subcampaign
+      subcampaign.find({ where: { 'campaignId': ctx.ctorArgs.id } }, function (err, subcampaignList) {
         if (err)
           throw err
-        return next()
+        var status = statusConfig.approved
+        for (var i = 0; i < subcampaignList.length; i++) {
+          if (subcampaignList[i].status === statusConfig.pending)
+            status = statusConfig.pending
+          if (subcampaignList[i].status === statusConfig.suspend) {
+            status = statusConfig.suspend
+            break
+          }
+        }
+        result.updateAttribute('status', status, function (err, response) {
+          if (err)
+            throw err
+          return next()
+        })        
       })
     })
   })
