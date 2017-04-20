@@ -50,14 +50,9 @@
       "foreignKey": "clientId"
     },
     "subcampaigns": {
-      "type": "embedsMany",
+      "type": "hasMany",
       "model": "subcampaign",
-      "property": "subcampaignList",
-      "options": {
-        "validate": true,
-        "forceId": true,
-        "persistent": true
-      }
+      "foreignKey": "campaignId"
     }
   },
   "acls": [

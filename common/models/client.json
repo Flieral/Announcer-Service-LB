@@ -64,14 +64,9 @@
       }
     },
     "campaigns": {
-      "type": "embedsMany",
+      "type": "hasMany",
       "model": "campaign",
-      "property": "campaignList",
-      "options": {
-        "validate": true,
-        "forceId": true,
-        "persistent": true
-      }
+      "foreignKey": "clientId"
     }
   },
   "acls": [
