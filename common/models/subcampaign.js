@@ -30,7 +30,7 @@ module.exports = function (subcampaign) {
         return callback(new Error('language Validation Error'), null)
       if (!utility.JSONIterator(data.os, osList))
         return callback(new Error('os Validation Error'), null)
-      if (!utility.JSONIterator(data.connection, deviceList))
+      if (!utility.JSONIterator(data.connection, connectionList))
         return callback(new Error('connection Validation Error'), null)
       if (!utility.JSONIterator(data.device, deviceList))
         return callback(new Error('device Validation Error'), null)
