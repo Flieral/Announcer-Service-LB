@@ -42,11 +42,11 @@
     },
     "dayParting": {
       "type": "object",
-      "required": true
+      "required": false
     },
     "preferences": {
       "type": "object",
-      "required": true
+      "required": false
     },
     "userLabel": {
       "type": [
