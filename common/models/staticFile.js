@@ -1,34 +1,44 @@
 'use strict'
-
+var statusJson = require('../../config/status')
 var CONTAINERS_URL = '/api/containers/'
-module.exports = function (File) {
 
-  File.uploadFile = function (ctx, options, cb) {
-    File.app.models.container.upload(ctx.req, ctx.result, options, function (err, fileObj) {
+module.exports = function (StaticFile) {
+
+  StaticFile.uploadFile = function (ctx, options, cb) {
+    StaticFile.app.models.container.upload(ctx.req, ctx.result, options, function (err, fileObj) {
       if (err)
-        cb(err)
+        return cb(err)
       else {
         // Here myFile is the field name associated with upload. You should change it to something else if you
         var fileInfo = fileObj.files.myFile[0]
-        File.create({
+        StaticFile.create({
           name: fileInfo.name,
           type: fileInfo.type,
           container: fileInfo.container,
-          userId: ctx.req.accessToken.userId,
+          clientId: ctx.req.accessToken.userId,
           url: CONTAINERS_URL + fileInfo.container + '/download/' + fileInfo.name // This is a hack for creating links
         }, function (err, obj) {
           if (err) {
             console.log('Error in uploading' + err)
-            cb(err)
+            return cb(err)
           } else {
-            cb(null, obj)
+            var subcampaign = StaticFile.app.models.subcampaign
+            subcampaign.findById(options.subcampaignId, function (err, subcampaignInst) {
+              if (err)
+                throw err
+              subcampaignInst.updateAttributes({ 'fileURL': CONTAINERS_URL + fileInfo.container + '/download/' + fileInfo.name, 'status': statusJson.pending }, function (err, response) {
+                if (err)
+                  throw err
+                return cb(null, obj)
+              })
+            })
           }
         })
       }
     })
   }
 
-  File.remoteMethod(
+  StaticFile.remoteMethod(
     'uploadFile', {
       description: 'Uploads a file',
       accepts: [{

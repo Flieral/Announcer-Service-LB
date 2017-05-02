@@ -19,6 +19,10 @@
     "clientId": {
       "type": "string",
       "required": true
+    },
+    "container": {
+      "type": "string",
+      "required": true
     }
   },
   "validations": [],
