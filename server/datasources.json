@@ -29,5 +29,12 @@
     "database": "db",
     "name": "mongoDs",
     "connector": "mongodb"
+  },
+  "storage": {
+    "name": "storage",
+    "connector": "loopback-component-storage",
+    "provider": "filesystem",
+    "root": "./filebank",
+    "maxFileSize": "52428800"
   }
 }

@@ -58,5 +58,13 @@
   "announcerAccount": {
     "dataSource": "mongoDs",
     "public": true
+  },
+  "container": {
+    "dataSource": "storage",
+    "public": true
+  },
+  "file": {
+    "dataSource": "mongoDs",
+    "public": false
   }
 }
