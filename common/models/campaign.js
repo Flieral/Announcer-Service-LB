@@ -86,7 +86,7 @@ module.exports = function (campaign) {
     campaign.findById(ctx.ctorArgs.id, function (err, result) {
       if (err)
         throw err
-      result.updateAttribute('status', statusConfig.pending, function (err, response) {
+      result.updateAttribute('status', statusConfig.created, function (err, response) {
         if (err)
           throw err
         return next()
