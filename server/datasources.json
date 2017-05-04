@@ -34,7 +34,7 @@
     "name": "storage",
     "connector": "loopback-component-storage",
     "provider": "filesystem",
-    "root": "./filebank",
+    "root": "./filebank/subFiles",
     "maxFileSize": "52428800"
   }
 }
