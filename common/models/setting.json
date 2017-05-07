@@ -62,7 +62,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "client": {
+      "type": "belongsTo",
+      "model": "client",
+      "foreignKey": "clientId"
+    }
+  },
   "acls": [],
   "hidden": [
   ],
