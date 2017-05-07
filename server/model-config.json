@@ -66,9 +66,5 @@
   "file": {
     "dataSource": "mongoDs",
     "public": false
-  },
-  "dynamicFile": {
-    "dataSource": "mongoDs",
-    "public": false
   }
 }
