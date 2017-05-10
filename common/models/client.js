@@ -149,6 +149,16 @@ module.exports = function (client) {
     }
   })
 
+  client.afterRemote('prototype.__create__campaigns', function (ctx, modelInstance, next) {
+    var option = {}
+    option.name = '' + modelInstance.id
+    app.models.container.createContainer(option, function (err, container){
+      if (err)
+        return next(err)
+      return next()
+    })
+  })
+
   client.beforeRemote('prototype.__updateById__campaigns', function (ctx, modelInstance, next) {
     roleManager.getRolesById(app, ctx.args.options.accessToken.userId, function (err, result) {
       if (err)
