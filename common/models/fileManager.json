@@ -1,5 +1,5 @@
 {
-  "name": "file",
+  "name": "fileManager",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
@@ -17,10 +17,6 @@
       "required": true
     },
     "clientId": {
-      "type": "string",
-      "required": true
-    },
-    "container": {
       "type": "string",
       "required": true
     }
@@ -55,7 +51,7 @@
       "principalType": "ROLE",
       "principalId": "$owner",
       "permission": "ALLOW",
-      "property": "create"
+      "property": "uploadFile"
     }
   ],
   "methods": {}
