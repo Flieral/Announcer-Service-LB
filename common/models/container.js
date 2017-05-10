@@ -1,5 +1,3 @@
-'use strict';
+module.exports = function(container) {
 
-module.exports = function(Container) {
-
-};
+}

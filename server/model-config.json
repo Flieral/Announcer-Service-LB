@@ -63,8 +63,8 @@
     "dataSource": "storage",
     "public": true
   },
-  "file": {
+  "fileManager": {
     "dataSource": "mongoDs",
-    "public": false
+    "public": true
   }
 }
