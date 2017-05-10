@@ -159,6 +159,15 @@ module.exports = function (client) {
     })
   })
 
+  client.afterRemote('prototype.__destroyById__campaigns', function (ctx, modelInstance, next) {
+    var container = '' + ctx.args.fk
+    app.models.container.destroyContainer(container, function (err){
+      if (err)
+        return next(err)
+      return next()
+    })
+  })
+  
   client.beforeRemote('prototype.__updateById__campaigns', function (ctx, modelInstance, next) {
     roleManager.getRolesById(app, ctx.args.options.accessToken.userId, function (err, result) {
       if (err)
