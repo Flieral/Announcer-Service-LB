@@ -1,3 +1,5 @@
+var fs = require('fs')
+
 module.exports = {
   generateQueryString: function (data) {
     var ret = []
@@ -14,7 +16,7 @@ module.exports = {
   base64Decoding: function (data) {
     return new Buffer(data, 'base64')
   },
-  
+
   getUnixTimeStamp: function () {
     return Math.floor((new Date).getTime() / 1000)
   },
@@ -36,5 +38,22 @@ module.exports = {
       if (validator.indexOf(input[i]) == -1)
         return false
     return true
+  },
+
+  base64FileEncoding: function (file, callback) {
+    fs.open(file, 'r+', function (err, fd) {
+      if (err)
+        return callback(err, null)
+      fs.readFile(fd, function (err, original_data) {
+        if (err)
+          return callback(err, null)
+        var base64Image = new Buffer(original_data, 'binary').toString('base64')
+        fs.close(fd, function (err) {
+          if (err)
+            callback(err, null)
+          return callback(null, base64Image)
+        })
+      })
+    })
   }
-}  
+}
