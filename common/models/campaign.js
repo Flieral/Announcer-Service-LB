@@ -115,6 +115,7 @@ module.exports = function (campaign) {
           connection: connectionList,
           clientId: ctx.args.options.accessToken.userId
         }
+        dctx.args.data.settingModel = settingToCreate
         setting.create(settingToCreate, function (err, setting) {
           if (err)
             throw err
@@ -158,7 +159,7 @@ module.exports = function (campaign) {
   campaign.afterRemote('prototype.__destroyById__subcampaigns', function (ctx, modelInstance, next) {
     var container = '' + ctx.ctorArgs.id
     var file = '' + ctx.args.fk
-    app.models.container.removeFile(container, file, function (err){
+    app.models.container.removeFile(container, file, function (err) {
       if (err)
         return next(err)
       return next()
