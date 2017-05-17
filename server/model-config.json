@@ -62,9 +62,5 @@
   "container": {
     "dataSource": "storage",
     "public": true
-  },
-  "fileManager": {
-    "dataSource": "mongoDs",
-    "public": true
   }
 }
