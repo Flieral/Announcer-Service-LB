@@ -47,6 +47,18 @@ module.exports = function (campaign) {
           ctx.args.data.clientId = ctx.args.options.accessToken.userId
           ctx.args.data.campaignId = ctx.args.options.accessToken.userId
           ctx.args.data.status = statusConfig.pending
+          var settingToCreate = {
+            priority: "Average",
+            category: categoryList,
+            country: countryList,
+            language: languageList,
+            device: deviceList,
+            os: osList,
+            userLabel: userLabelList,
+            connection: connectionList,
+            clientId: ctx.args.options.accessToken.userId
+          }
+          ctx.args.data.settingModel = settingToCreate
           return next()
         })
       })
@@ -103,24 +115,7 @@ module.exports = function (campaign) {
       result.updateAttribute('status', statusConfig.created, function (err, response) {
         if (err)
           throw err
-        var setting = campaign.app.models.setting
-        var settingToCreate = {
-          priority: "Average",
-          category: categoryList,
-          country: countryList,
-          language: languageList,
-          device: deviceList,
-          os: osList,
-          userLabel: userLabelList,
-          connection: connectionList,
-          clientId: ctx.args.options.accessToken.userId
-        }
-        dctx.args.data.settingModel = settingToCreate
-        setting.create(settingToCreate, function (err, setting) {
-          if (err)
-            throw err
-          return next()
-        })
+        return next()
       })
     })
   })
