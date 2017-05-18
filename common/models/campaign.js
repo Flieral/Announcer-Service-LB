@@ -161,4 +161,50 @@ module.exports = function (campaign) {
     })
   })
 
+  campaign.startManual = function (ctx, campaignHashId, callback) {
+    if (!ctx.args.options.accessToken)
+      return next()
+    campaign.findById(campaignHashId, function (err, result) {
+      if (err)
+        throw err
+      if (result.beginningTime >= utility.getUnixTimeStamp() && result.endingTime <= utility.getUnixTimeStamp() && result.status == statusConfig.approved) {
+        result.updateAttribute('status', statusConfig.started, function (err, obj) {
+          if (err)
+            throw err
+          return callback(null, 'Started')
+        })
+      }
+      else {
+        return callback(new Error('Can not be started'))
+      }
+    })
+  }
+
+  campaign.remoteMethod('startManual', {
+    description: 'start manually a campaign',
+    accepts: [{
+        arg: 'ctx',
+        type: 'object',
+        http: {
+          source: 'context'
+        }
+      },
+      {
+        arg: 'campaignHashId',
+        type: 'string',
+        required: true,
+        http: {
+          source: 'query'
+        }
+      }
+    ],
+    returns: {
+      arg: 'startResponse',
+      type: 'string'
+    },
+    http: {
+      verb: 'GET'
+    }
+  })
+
 }
