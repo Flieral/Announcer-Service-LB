@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "bcrypt": "^1.0.2",
+    "cheerio": "^0.22.0",
     "columnify": "^1.5.4",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
@@ -20,6 +21,7 @@
     "loopback-connector-mongodb": "^1.18.1",
     "loopback-connector-redis": "^0.1.0",
     "loopback-datasource-juggler": "^3.2.0",
+    "node-file-manager": "^0.4.6",
     "redis": "^2.7.1",
     "serve-favicon": "^2.0.1",
     "storage": "^0.2.0",
