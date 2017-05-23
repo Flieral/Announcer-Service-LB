@@ -173,7 +173,7 @@ module.exports = function (client) {
       if (err)
         return next(err)
       if (result.roles.length == 0) {
-        var whiteList = ['budget', 'beginningTime', 'endingTime', 'name', 'startStyle']
+        var whiteList = ['budget', 'beginningTime', 'endingTime', 'name']
         if (utility.inputChecker(ctx.args.data, whiteList)) {
           var callbackFired = false
           var campaign = app.models.campaign
