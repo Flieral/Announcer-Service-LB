@@ -6,8 +6,11 @@ var languageList = require('../../config/language.json')
 var osList = require('../../config/operatingSystem.json')
 var connectionList = require('../../config/connection.json')
 var deviceList = require('../../config/device.json')
+var statusConfig = require('../../config/status')
 
 var utility = require('../../public/utility.js')
+
+var app = require('../../server/server')
 
 module.exports = function (subcampaign) {
   
@@ -60,4 +63,106 @@ module.exports = function (subcampaign) {
       return next()
     })
   })
+
+  subcampaign.reduceChain = function (subcampaignHashID, campaignHashID, accountHashID, reduceValue, cb) {
+    var campaign = app.models.campaign
+    var announcerAccount = app.models.announcerAccount
+    var reduction = 0
+    subcampaign.findById(subcampaignHashID, function (err, subcampaignInst) {
+      if (err)
+        return cb(err, null)
+      if (subcampaignInst.minBudget < reduceValue)
+        reduceValue = subcampaignInst.minBudget
+      reduction = subcampaignInst.minBudget - reduceValue
+      var subcampaigndata = {}
+      subcampaigndata.minBudget = reduction
+      if (reduction == 0)
+        subcampaigndata.status = statusConfig.finished
+      subcampaignInst.updateAttributes(subcampaigndata, function (err, response) {
+        if (err)
+          return cb(err, null)
+        var filter = {
+          include: 'subcampaigns'
+        }
+        campaign.findById(campaignHashID, filter, function (err, campaignInst) {
+          if (err)
+            return cb(err, null)
+          if (campaignInst.budget < reduceValue)
+            reduceValue = campaignInst.budget
+          reduction = campaignInst.budget - reduceValue
+          var campaigndata = {}
+          campaigndata.budget = reduction
+          var allSubcampaignsFinished = false
+          var counter = 0
+          for (var i = 0; i < campaignInst.subcampaignModels.length; i++)
+            if (campaignInst.subcampaignModels[i].status === statusConfig.finished)
+              counter++
+          if (counter == campaignInst.subcampaignModels.length)
+            allSubcampaignsFinished = true
+          if (reduction == 0 || allSubcampaignsFinished)
+            campaigndata.status = statusConfig.finished
+          campaignInst.updateAttributes(campaigndata, function (err, response) {
+            if (err)
+              return cb(err, null)
+            announcerAccount.findById(accountHashID, function (err, accountInst) {
+              if (err)
+                return cb(err, null)
+              if (accountInst.budget < reduceValue)
+                reduceValue = accountInst.budget
+              reduction = accountInst.budget - reduceValue
+              accountInst.updateAttribute('budget', reduction, function (err, response) {
+                if (err)
+                  return cb(err, null)
+                return cb('successful reduction chain')
+              })
+            })
+          })
+        })
+      })
+    })
+  }
+
+  subcampaign.remoteMethod('reduceChain', {
+    accepts: [{
+      arg: 'subcampaignHashID',
+      type: 'string',
+      required: true,
+      http: {
+        source: 'query'
+      }
+    }, {
+      arg: 'campaignHashID',
+      type: 'string',
+      required: true,
+      http: {
+        source: 'query'
+      }
+    }, {
+      arg: 'accountHashID',
+      type: 'string',
+      required: true,
+      http: {
+        source: 'query'
+      }
+    }, {
+      arg: 'reduceValue',
+      type: 'number',
+      required: true,
+      http: {
+        source: 'query'
+      }
+    }],
+    description: 'sub reduceValue from particular chain of subcampaign and its campaign and its own account',
+    http: {
+      path: '/reduceChain',
+      verb: 'POST',
+      status: 200,
+      errorStatus: 400
+    },
+    returns: {
+      arg: 'response',
+      type: 'object'
+    }
+  })
+
 }
