@@ -38,6 +38,10 @@ module.exports = function (client) {
       ctx.args.credentials.password = pass1
       ctx.req.body.password = pass2
     }
+    if (ctx.args.credentials.email || ctx.req.body.email) {
+      ctx.args.credentials.email = ctx.args.credentials.email.toLowerCase()
+      ctx.req.body.email = ctx.req.body.email.toLowerCase()
+    }
     return next()
   })
 
@@ -80,6 +84,7 @@ module.exports = function (client) {
     if (!utility.inputChecker(ctx.args.data, whiteList))
       return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
     else {
+      ctx.args.data.email = ctx.args.data.email.toLowerCase()
       ctx.args.data.announcerAccountModel = {}
       ctx.args.data.announcerAccountModel.budget = 0
       ctx.args.data.announcerAccountModel.type = accountType.free
