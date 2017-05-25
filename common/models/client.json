@@ -153,6 +153,12 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "__count__campaigns"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "checkout"
     }
   ],
   "methods": {}

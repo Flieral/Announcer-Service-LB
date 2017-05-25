@@ -357,4 +357,45 @@ module.exports = function (client) {
       if (err) return next(err)
     })
   })
+
+  client.checkout = function (accountHashID, cb) {
+    var filter = {
+      include: 'campaigns'
+    }
+    client.findById(accountHashID, filter, function(err, result) {
+      if (err)
+        return cb(err, null)
+      var campsBudget = 0
+      for (var i = 0; i < result.campaigns.length; i++)
+        campsBudget += result.campaigns[i].budget
+      result.announcerAccountModel.update({budget: campsBudget}, function(err, response) {
+        if (err)
+          return cb(err, null)
+        return cb(response)
+      })
+    })
+  }
+
+  client.remoteMethod('checkout', {
+    accepts: [{
+      arg: 'accountHashID',
+      type: 'string',
+      required: true,
+      http: {
+        source: 'query'
+      }
+    }],
+    description: 'checkout remaining budget balance',
+    http: {
+      path: '/checkout',
+      verb: 'POST',
+      status: 200,
+      errorStatus: 400
+    },
+    returns: {
+      arg: 'response',
+      type: 'object'
+    }
+  })
+
 }
