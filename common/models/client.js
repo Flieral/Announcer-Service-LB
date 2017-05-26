@@ -358,25 +358,44 @@ module.exports = function (client) {
     })
   })
 
-  client.checkout = function (accountHashID, cb) {
+  client.getRefinement = function (accountHashID, cb) {
     var filter = {
       include: 'campaigns'
     }
     client.findById(accountHashID, filter, function(err, result) {
       if (err)
-        return cb(err, null)
-      var campsBudget = 0
+        return cb(err)
+      var finishedCampaignsCounter = 0
       for (var i = 0; i < result.campaigns.length; i++)
-        campsBudget += result.campaigns[i].budget
-      result.announcerAccountModel.update({budget: campsBudget}, function(err, response) {
-        if (err)
-          return cb(err, null)
-        return cb(response)
-      })
+        if (result.campaigns[i].status === statusJson.finished)
+          finishedCampaignsCounter++
+      if (finishedCampaignsCounter == result.campaigns.length) {
+        var subcampaign = app.models.subcampaign
+        var subFilter = {
+          where: {
+            'clientId': accountHashID
+          }
+        }
+        subcampaign.find(subFilter, function(err, subcampainList) {
+          if (err)
+            return cb(err)
+          var totalSubs = 0
+          for (var i = 0; i < subcampainList.length; i++)
+            totalSubs += subcampainList[i].budget
+          var remaining = result.announcerAccountModel.budget - totalSubs
+          if (remaining == 0)
+            return cb(new Error('no remaining money budget. balance is 0.'))
+          else
+            return cb(remaining)
+        })
+      }
+      else {
+        cb(new Error('campaigns are not totally finished'))
+      }
     })
   }
 
-  client.remoteMethod('checkout', {
+  client.remoteMethod('getRefinement', {
     accepts: [{
       arg: 'accountHashID',
       type: 'string',
@@ -385,9 +404,65 @@ module.exports = function (client) {
         source: 'query'
       }
     }],
-    description: 'checkout remaining budget balance',
+    description: 'return refine remaining budget balance',
     http: {
-      path: '/checkout',
+      path: ':accountHashID/getRefinement',
+      verb: 'POST',
+      status: 200,
+      errorStatus: 400
+    },
+    returns: {
+      arg: 'response',
+      type: 'object'
+    }
+  })
+
+  client.doRefinement = function (accountHashID, cb) {
+    var campaign = app.models.campaign
+    var filter = {
+      'where': {
+        'clientId': accountHashID
+      },
+      'include': 'subcampaigns'
+    }
+    campaign.find(filter, function(err, campaigns) {
+      if (err)
+        return cb(err)
+      var campCounter = 0
+      var totalBudget = 0
+      for (var i = 0; i < campaigns.length; i++) {
+        var campBudget = 0
+        for (var j = 0; j < campaigns[i].subcampaigns.length; j++)
+          campBudget += campaigns[i].subcampaigns[j].minBudget
+        totalBudget += campBudget
+        campaigns[i].updateAttribute({'budget': campBudget}, function(err, result) {
+          if (err)
+            return cb(err)
+          campCounter++
+          if (campCounter == campaigns.length) {
+            client.announcerAccountModel.update({'budget': totalBudget}, function(err, result) {
+              if (err)
+                return cb(err)
+              return cb('refinement done')
+            })
+          }
+        })
+      }
+    })
+  }
+
+  client.remoteMethod('doRefinement', {
+    accepts: [{
+      arg: 'accountHashID',
+      type: 'string',
+      required: true,
+      http: {
+        source: 'query'
+      }
+    }],
+    description: 'do refining budget balance',
+    http: {
+      path: ':accountHashID/doRefinement',
       verb: 'POST',
       status: 200,
       errorStatus: 400

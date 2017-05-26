@@ -158,7 +158,13 @@
       "principalType": "ROLE",
       "principalId": "$owner",
       "permission": "ALLOW",
-      "property": "checkout"
+      "property": "getRefinement"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW",
+      "property": "doRefinement"
     }
   ],
   "methods": {}
