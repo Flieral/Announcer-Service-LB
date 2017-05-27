@@ -36,7 +36,7 @@ module.exports = function (campaign) {
         var subcampaign = app.models.subcampaign
         subcampaign.find({
           where: {
-            'campaignId': ctx.req.params.fk
+            'campaignId': ctx.req.params.id
           }
         }, function (err, subcampaignList) {
           if (err)
@@ -47,7 +47,7 @@ module.exports = function (campaign) {
           if (ctx.args.data.minBudget + subBudget > result.budget)
             return next(new Error('Error in Budget (Subcampaign)'))
           ctx.args.data.clientId = ctx.args.options.accessToken.userId
-          ctx.args.data.campaignId = ctx.args.options.accessToken.userId
+          ctx.args.data.campaignId = ctx.req.params.id
           ctx.args.data.weight = 0
           var settingToCreate = {
             priority: "Average",
