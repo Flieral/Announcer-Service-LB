@@ -6,8 +6,7 @@
     "validateUpsert": true
   },
   "hidden": [
-    "fileURL",
-    "settingModel"
+    "fileURL"
   ],
   "properties": {
     "minBudget": {
@@ -98,6 +97,12 @@
       "principalId": "$owner",
       "permission": "ALLOW",
       "property": "__destroy__setting"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW",
+      "property": "reduceChain"
     }
   ],
   "methods": {}

@@ -42,11 +42,11 @@
     },
     "dayParting": {
       "type": "object",
-      "required": true
+      "required": false
     },
     "preferences": {
       "type": "object",
-      "required": true
+      "required": false
     },
     "userLabel": {
       "type": [
@@ -62,7 +62,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "client": {
+      "type": "belongsTo",
+      "model": "client",
+      "foreignKey": "clientId"
+    }
+  },
   "acls": [],
   "hidden": [
   ],

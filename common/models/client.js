@@ -20,6 +20,8 @@ var statusJson = require('../../config/status.json')
 var app = require('../../server/server')
 var roleManager = require('../../public/roleManager')
 
+var rankingHelper = require('../helpers/rankingHelper')
+
 module.exports = function (client) {
 
   methodDisabler.disableOnlyTheseMethods(client, relationMethodPrefixes)
@@ -37,6 +39,10 @@ module.exports = function (client) {
       var pass2 = utility.base64Decoding(ctx.req.body.password).toString()
       ctx.args.credentials.password = pass1
       ctx.req.body.password = pass2
+    }
+    if (ctx.args.credentials.email || ctx.req.body.email) {
+      ctx.args.credentials.email = ctx.args.credentials.email.toLowerCase()
+      ctx.req.body.email = ctx.req.body.email.toLowerCase()
     }
     return next()
   })
@@ -80,6 +86,7 @@ module.exports = function (client) {
     if (!utility.inputChecker(ctx.args.data, whiteList))
       return next(new Error('White List Error! Allowed Parameters: ' + whiteList.toString()))
     else {
+      ctx.args.data.email = ctx.args.data.email.toLowerCase()
       ctx.args.data.announcerAccountModel = {}
       ctx.args.data.announcerAccountModel.budget = 0
       ctx.args.data.announcerAccountModel.type = accountType.free
@@ -149,12 +156,47 @@ module.exports = function (client) {
     }
   })
 
+  client.afterRemote('prototype.__create__campaigns', function (ctx, modelInstance, next) {
+    var option = {}
+    option.name = '' + modelInstance.id
+    app.models.container.createContainer(option, function (err, container){
+      if (err)
+        return next(err)
+      return next()
+    })
+  })
+
+  client.beforeRemote('prototype.__destroyById__campaigns', function (ctx, modelInstance, next) {
+    var campaign = app.models.campaign
+    campaign.findById(ctx.req.params.fk, function (err, response) {
+      if (err)
+        throw err
+      if (modelInstance.status !== statusJson.started)
+        next()
+      else
+        next(new Error('campaign should not be started'))
+    })
+  })
+
+  client.afterRemote('prototype.__destroyById__campaigns', function (ctx, modelInstance, next) {
+    var container = '' + ctx.args.fk
+    app.models.container.destroyContainer(container, function (err){
+      if (err)
+        return next(err)
+      rankingHelper.recalculateRankingAndWeight(function(err, result) {
+        if (err)
+          return next(err)
+        return next()
+      })
+    })
+  })
+  
   client.beforeRemote('prototype.__updateById__campaigns', function (ctx, modelInstance, next) {
     roleManager.getRolesById(app, ctx.args.options.accessToken.userId, function (err, result) {
       if (err)
         return next(err)
       if (result.roles.length == 0) {
-        var whiteList = ['budget', 'beginningTime', 'endingTime', 'name', 'startStyle']
+        var whiteList = ['budget', 'beginningTime', 'endingTime', 'name']
         if (utility.inputChecker(ctx.args.data, whiteList)) {
           var callbackFired = false
           var campaign = app.models.campaign
@@ -225,6 +267,18 @@ module.exports = function (client) {
         return next()
       }
     })
+  })
+
+  client.afterRemote('prototype.__updateById__campaigns', function (ctx, modelInstance, next) {
+    if (modelInstance.status === statusJson.started) {
+      rankingHelper.setRankingAndWeight(modelInstance, function(err, result) {
+        if (err)
+          return next(err)
+        return next()
+      })
+    }
+    else
+      next()
   })
 
   client.beforeRemote('replaceById', function (ctx, modelInstance, next) {
@@ -333,4 +387,120 @@ module.exports = function (client) {
       if (err) return next(err)
     })
   })
+
+  client.getRefinement = function (accountHashID, cb) {
+    var filter = {
+      include: 'campaigns'
+    }
+    client.findById(accountHashID, filter, function(err, result) {
+      if (err)
+        return cb(err)
+      var finishedCampaignsCounter = 0
+      for (var i = 0; i < result.campaigns.length; i++)
+        if (result.campaigns[i].status === statusJson.finished)
+          finishedCampaignsCounter++
+      if (finishedCampaignsCounter == result.campaigns.length) {
+        var subcampaign = app.models.subcampaign
+        var subFilter = {
+          where: {
+            'clientId': accountHashID
+          }
+        }
+        subcampaign.find(subFilter, function(err, subcampainList) {
+          if (err)
+            return cb(err)
+          var totalSubs = 0
+          for (var i = 0; i < subcampainList.length; i++)
+            totalSubs += subcampainList[i].budget
+          var remaining = result.announcerAccountModel.budget - totalSubs
+          if (remaining == 0)
+            return cb(new Error('no remaining money budget. balance is 0.'))
+          else
+            return cb(remaining)
+        })
+      }
+      else {
+        cb(new Error('campaigns are not totally finished'))
+      }
+    })
+  }
+
+  client.remoteMethod('getRefinement', {
+    accepts: [{
+      arg: 'accountHashID',
+      type: 'string',
+      required: true,
+      http: {
+        source: 'query'
+      }
+    }],
+    description: 'return refine remaining budget balance',
+    http: {
+      path: ':accountHashID/getRefinement',
+      verb: 'POST',
+      status: 200,
+      errorStatus: 400
+    },
+    returns: {
+      arg: 'response',
+      type: 'object'
+    }
+  })
+
+  client.doRefinement = function (accountHashID, cb) {
+    var campaign = app.models.campaign
+    var filter = {
+      'where': {
+        'clientId': accountHashID
+      },
+      'include': 'subcampaigns'
+    }
+    campaign.find(filter, function(err, campaigns) {
+      if (err)
+        return cb(err)
+      var campCounter = 0
+      var totalBudget = 0
+      for (var i = 0; i < campaigns.length; i++) {
+        var campBudget = 0
+        for (var j = 0; j < campaigns[i].subcampaigns.length; j++)
+          campBudget += campaigns[i].subcampaigns[j].minBudget
+        totalBudget += campBudget
+        campaigns[i].updateAttribute({'budget': campBudget}, function(err, result) {
+          if (err)
+            return cb(err)
+          campCounter++
+          if (campCounter == campaigns.length) {
+            client.announcerAccountModel.update({'budget': totalBudget}, function(err, result) {
+              if (err)
+                return cb(err)
+              return cb('refinement done')
+            })
+          }
+        })
+      }
+    })
+  }
+
+  client.remoteMethod('doRefinement', {
+    accepts: [{
+      arg: 'accountHashID',
+      type: 'string',
+      required: true,
+      http: {
+        source: 'query'
+      }
+    }],
+    description: 'do refining budget balance',
+    http: {
+      path: ':accountHashID/doRefinement',
+      verb: 'POST',
+      status: 200,
+      errorStatus: 400
+    },
+    returns: {
+      arg: 'response',
+      type: 'object'
+    }
+  })
+
 }

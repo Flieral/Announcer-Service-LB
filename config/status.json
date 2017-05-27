@@ -1,5 +1,8 @@
 {
   "pending": "Pending",
   "suspend": "Suspend",
-  "approved": "Approved"
+  "approved": "Approved",
+  "created": "Created",
+  "finished": "Finished",
+  "started": "Started"
 }

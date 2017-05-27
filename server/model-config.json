@@ -19,7 +19,7 @@
   },
   "AccessToken": {
     "dataSource": "db",
-    "public": false
+    "public": true
   },
   "ACL": {
     "dataSource": "db",
@@ -57,6 +57,10 @@
   },
   "announcerAccount": {
     "dataSource": "mongoDs",
+    "public": true
+  },
+  "container": {
+    "dataSource": "storage",
     "public": true
   }
 }
