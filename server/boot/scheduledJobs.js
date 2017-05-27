@@ -3,6 +3,8 @@ var app = require('../server')
 var statusConfig = require('../../config/status.json')
 var utility = require('../../public/utility')
 
+var rankingHelper = require('../../common/helpers/rankingHelper')
+
 var startCampaign = cron.job("0 */1 * * * *", function () {
   campaign = app.models.campaign
   campaign.find({
@@ -18,6 +20,10 @@ var startCampaign = cron.job("0 */1 * * * *", function () {
         campaignList[i].updateAttribute('status', status.started, function (err, campaignInst) {
 					if (err)
 						throw err
+          rankingHelper.setRankingAndWeight(campaignList[i], function(err, result) {
+            if (err)
+              throw err            
+          })
         })
       }
     }
@@ -38,11 +44,23 @@ var finishCampaign = cron.job("0 */1 * * * *", function () {
         campaignList[i].updateAttribute('status', status.finished, function (err, campaignInst) {
 					if (err)
 						throw err
+          rankingHelper.recalculateRankingAndWeight(function(err, result) {
+            if (err)
+              throw err
+          })
         })
       }
     }
   })
 })
 
+var recalculateRanking = cron.job("0 */1 * * * *", function () {
+  rankingHelper.recalculateRankingAndWeight(function(err, result) {
+    if (err)
+      throw err
+  })
+})
+
 startCampaign.start()
 finishCampaign.start()
+recalculateRanking.start()

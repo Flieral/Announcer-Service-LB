@@ -20,6 +20,8 @@ var statusJson = require('../../config/status.json')
 var app = require('../../server/server')
 var roleManager = require('../../public/roleManager')
 
+var rankingHelper = require('../helpers/rankingHelper')
+
 module.exports = function (client) {
 
   methodDisabler.disableOnlyTheseMethods(client, relationMethodPrefixes)
@@ -164,12 +166,28 @@ module.exports = function (client) {
     })
   })
 
+  client.beforeRemote('prototype.__destroyById__campaigns', function (ctx, modelInstance, next) {
+    var campaign = app.models.campaign
+    campaign.findById(ctx.req.params.fk, function (err, response) {
+      if (err)
+        throw err
+      if (modelInstance.status !== statusJson.started)
+        next()
+      else
+        next(new Error('campaign should not be started'))
+    })
+  })
+
   client.afterRemote('prototype.__destroyById__campaigns', function (ctx, modelInstance, next) {
     var container = '' + ctx.args.fk
     app.models.container.destroyContainer(container, function (err){
       if (err)
         return next(err)
-      return next()
+      rankingHelper.recalculateRankingAndWeight(function(err, result) {
+        if (err)
+          return next(err)
+        return next()
+      })
     })
   })
   
@@ -249,6 +267,18 @@ module.exports = function (client) {
         return next()
       }
     })
+  })
+
+  client.afterRemote('prototype.__updateById__campaigns', function (ctx, modelInstance, next) {
+    if (modelInstance.status === statusJson.started) {
+      rankingHelper.setRankingAndWeight(modelInstance, function(err, result) {
+        if (err)
+          return next(err)
+        return next()
+      })
+    }
+    else
+      next()
   })
 
   client.beforeRemote('replaceById', function (ctx, modelInstance, next) {

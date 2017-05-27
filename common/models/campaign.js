@@ -13,6 +13,8 @@ var osList = require('../../config/operatingSystem.json')
 var connectionList = require('../../config/connection.json')
 var deviceList = require('../../config/device.json')
 
+var rankingHelper = require('../helpers/rankingHelper')
+
 module.exports = function (campaign) {
 
   campaign.validatesInclusionOf('startStyle', { in: startStyleList
@@ -46,7 +48,7 @@ module.exports = function (campaign) {
             return next(new Error('Error in Budget (Subcampaign)'))
           ctx.args.data.clientId = ctx.args.options.accessToken.userId
           ctx.args.data.campaignId = ctx.args.options.accessToken.userId
-          ctx.args.data.status = statusConfig.pending
+          ctx.args.data.weight = 0
           var settingToCreate = {
             priority: "Average",
             category: categoryList,
@@ -133,7 +135,7 @@ module.exports = function (campaign) {
       }, function (err, subcampaignList) {
         if (err)
           throw err
-        var status = statusConfig.approved
+        var status = result.status
         for (var i = 0; i < subcampaignList.length; i++) {
           if (subcampaignList[i].status === statusConfig.pending)
             status = statusConfig.pending
@@ -145,7 +147,15 @@ module.exports = function (campaign) {
         result.updateAttribute('status', status, function (err, response) {
           if (err)
             throw err
-          return next()
+          if (result.status === statusConfig.started || result.status === status.approved) {
+            rankingHelper.setRankingAndWeight(result, function(err, result) {
+              if (err)
+                return next(err)
+              return next()
+            })
+          }
+          else 
+            return next()
         })
       })
     })
@@ -157,7 +167,11 @@ module.exports = function (campaign) {
     app.models.container.removeFile(container, file, function (err) {
       if (err)
         return next(err)
-      return next()
+      rankingHelper.recalculateRankingAndWeight(function(err, result) {
+        if (err)
+          return next(err)
+        return next()
+      })
     })
   })
 
