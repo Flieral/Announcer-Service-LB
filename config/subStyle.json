@@ -3,5 +3,6 @@
   "Banner: Medium",
   "Banner: Large",
 
-  "Interstitial"
+  "Interstitial",
+  "Overlay"
 ]
