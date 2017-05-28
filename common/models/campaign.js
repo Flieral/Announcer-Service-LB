@@ -85,7 +85,7 @@ module.exports = function (campaign) {
               var subcampaign = app.models.subcampaign
               subcampaign.find({
                 where: {
-                  'campaignId': ctx.req.params.fk
+                  'campaignId': ctx.req.params.id
                 }
               }, function (err, subcampaignList) {
                 if (err)
