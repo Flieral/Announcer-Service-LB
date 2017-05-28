@@ -4,5 +4,7 @@
   "approved": "Approved",
   "created": "Created",
   "finished": "Finished",
-  "started": "Started"
+  "started": "Started",
+  "stopped": "Stopped",
+  "unstopped": "UnStopped"
 }

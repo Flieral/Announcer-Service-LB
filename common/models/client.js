@@ -196,13 +196,25 @@ module.exports = function (client) {
       if (err)
         return next(err)
       if (result.roles.length == 0) {
-        var whiteList = ['budget', 'beginningTime', 'endingTime', 'name']
+        var whiteList = ['budget', 'beginningTime', 'endingTime', 'name', 'status']
         if (utility.inputChecker(ctx.args.data, whiteList)) {
           var callbackFired = false
           var campaign = app.models.campaign
           campaign.findById(ctx.req.params.fk, function (err, response) {
             if (err)
               throw err
+            if (ctx.args.data.status) {
+              var validStatus = [statusJson.stopped, statusJson.unstopped]
+              if (validStatus.indexOf(ctx.args.data.status) <= -1)
+                return next(new Error('Whitelist Input Error for Status'))
+              if (ctx.args.data.status !== statusJson.stopped && response.status === statusJson.started)
+                return next(new Error('Stopping Only Started Campaigns are Allowed'))
+              if (ctx.args.data.status !== statusJson.unstopped && response.status === statusJson.stopped)
+                return next(new Error('Unstopping Only Stopped Campaigns are Allowed'))
+              else
+                ctx.args.data.status = statusJson.started
+            }
+
             if (ctx.args.data.endingTime && ctx.args.data.beginningTime) {
               if (ctx.args.data.beginningTime < utility.getUnixTimeStamp())
                 return next(new Error('Beginning Time Can not be Less than Now'))
@@ -270,11 +282,34 @@ module.exports = function (client) {
   })
 
   client.afterRemote('prototype.__updateById__campaigns', function (ctx, modelInstance, next) {
+    function changeCampaignStatus(campaignId, status, callback) {
+      var subcampaign = app.models.subcampaign
+      subcampaign.updateAll({'where': {'campaignId': campaignId}}, {'status': status}, function(err, result, count) {
+        if (err)
+          return callback(err, null)
+        return callback(null, result)
+      })
+    }
     if (modelInstance.status === statusJson.started) {
-      rankingHelper.setRankingAndWeight(modelInstance, function(err, result) {
+      changeCampaignStatus(modelInstance.id, statusJson.approved, function(err, result) {
         if (err)
           return next(err)
-        return next()
+        rankingHelper.setRankingAndWeight(modelInstance, function(err, result) {
+          if (err)
+            return next(err)
+          return next()
+        })        
+      })
+    }
+    else if (modelInstance.status === statusJson.stopped) {
+      changeCampaignStatus(modelInstance.id, statusJson.stopped, function(err, result) {
+        if (err)
+          return next(err)
+        rankingHelper.recalculateRankingAndWeight(function(err, result) {
+          if (err)
+            return next(err)
+          return next()
+        })        
       })
     }
     else
