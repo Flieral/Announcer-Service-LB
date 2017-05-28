@@ -135,15 +135,20 @@ module.exports = function (campaign) {
       }, function (err, subcampaignList) {
         if (err)
           throw err
+        var approvedCounter = 0
         var status = result.status
         for (var i = 0; i < subcampaignList.length; i++) {
           if (subcampaignList[i].status === statusConfig.pending)
             status = statusConfig.pending
+          if (subcampaignList[i].status === statusConfig.approved)
+            approvedCounter++
           if (subcampaignList[i].status === statusConfig.suspend) {
             status = statusConfig.suspend
             break
           }
         }
+        if (approvedCounter == subcampaignList.length)
+          status = statusConfig.approved
         result.updateAttribute('status', status, function (err, response) {
           if (err)
             throw err
