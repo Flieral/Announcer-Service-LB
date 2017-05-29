@@ -24,6 +24,7 @@ module.exports = function (app) {
     }
   ]
   ACL.create(accessControls, function (err, acls) {
-    console.log('ACL entry created: %j', acls)
+    if (err)
+      throw err
   })
 }
