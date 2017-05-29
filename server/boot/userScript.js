@@ -7,7 +7,7 @@ module.exports = function (app) {
 
   var users = [{
       username: 'MrWooJ',
-      email: 'CEO@Flieral.com',
+      email: 'ceo@flieral.com',
       password: 'Fl13r4lAlirezaPass',
       time: 1234567891,
       companyName: "Flieral",
@@ -17,7 +17,7 @@ module.exports = function (app) {
     },
     {
       username: 'Mohammad4x',
-      email: 'CTO@Flieral.com',
+      email: 'cto@flieral.com',
       password: 'Fl13r4lMohammadPass',
       time: 1234567891,
       companyName: "Flieral",
@@ -27,7 +27,7 @@ module.exports = function (app) {
     },
     {
       username: 'Support',
-      email: 'Support@Flieral.com',
+      email: 'support@flieral.com',
       password: 'Fl13r4lSupportPass',
       time: 1234567891,
       companyName: "Flieral",
