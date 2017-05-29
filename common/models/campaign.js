@@ -29,7 +29,7 @@ module.exports = function (campaign) {
     if (utility.inputChecker(ctx.args.data, whiteList)) {
       campaign.findById(ctx.req.params.id, function (err, result) {
         if (err)
-          throw err
+          return next(err)
         if (ctx.args.data.minBudget == 0)
           return next(new Error('Error in Budget (Zero)'))
 
@@ -40,7 +40,7 @@ module.exports = function (campaign) {
           }
         }, function (err, subcampaignList) {
           if (err)
-            throw err
+            return next(err)
           var subBudget = 0
           for (var i = 0; i < subcampaignList.length; i++)
             subBudget += subcampaignList[i].minBudget
@@ -78,7 +78,7 @@ module.exports = function (campaign) {
           if (ctx.args.data.minBudget) {
             campaign.findById(ctx.req.params.id, function (err, result) {
               if (err)
-                throw err
+                return next(err)
               if (ctx.args.data.minBudget == 0)
                 return next(new Error('Error in Budget (Zero)'))
 
@@ -89,7 +89,7 @@ module.exports = function (campaign) {
                 }
               }, function (err, subcampaignList) {
                 if (err)
-                  throw err
+                  return next(err)
                 var subBudget = 0
                 for (var i = 0; i < subcampaignList.length; i++) {
                   if (subcampaignList[i].id == ctx.req.params.fk)
@@ -113,10 +113,10 @@ module.exports = function (campaign) {
   campaign.afterRemote('prototype.__create__subcampaigns', function (ctx, modelInstance, next) {
     campaign.findById(ctx.ctorArgs.id, function (err, result) {
       if (err)
-        throw err
+        return next(err)
       result.updateAttribute('status', statusConfig.created, function (err, response) {
         if (err)
-          throw err
+          return next(err)
         return next()
       })
     })
@@ -125,7 +125,7 @@ module.exports = function (campaign) {
   campaign.afterRemote('prototype.__updateById__subcampaigns', function (ctx, modelInstance, next) {
     campaign.findById(ctx.ctorArgs.id, function (err, result) {
       if (err)
-        throw err
+        return next(err)
 
       var subcampaign = app.models.subcampaign
       subcampaign.find({
@@ -134,7 +134,7 @@ module.exports = function (campaign) {
         }
       }, function (err, subcampaignList) {
         if (err)
-          throw err
+          return next(err)
         var approvedCounter = 0
         var status = result.status
         for (var i = 0; i < subcampaignList.length; i++) {
@@ -151,7 +151,7 @@ module.exports = function (campaign) {
           status = statusConfig.approved
         result.updateAttribute('status', status, function (err, response) {
           if (err)
-            throw err
+            return next(err)
           if (result.status === statusConfig.started || result.status === status.approved) {
             rankingHelper.setRankingAndWeight(result, function(err, result) {
               if (err)
@@ -185,12 +185,12 @@ module.exports = function (campaign) {
       return next()
     campaign.findById(campaignHashId, function (err, result) {
       if (err)
-        throw err
+        return callback(err)
       if (result.beginningTime >= utility.getUnixTimeStamp() && result.endingTime <= utility.getUnixTimeStamp() && result.status == statusConfig.approved) {
         result.updateAttribute('status', statusConfig.started, function (err, obj) {
           if (err)
-            throw err
-          return callback(null, 'Started')
+            return callback(err)
+          return callback('Started')
         })
       }
       else {

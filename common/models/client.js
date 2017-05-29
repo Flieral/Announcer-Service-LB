@@ -54,14 +54,14 @@ module.exports = function (client) {
       if (result.roles.length == 0) {
         client.findById(modelInstance.userId, function (err, result) {
           if (err)
-            throw err
+            return next(err)
           if (result.clientType.indexOf('Announcer') <= -1) {
             var oldSet = []
             oldSet = result.clientType
             oldSet.push('Announcer')
             result.updateAttribute('clientType', oldSet, function (err, response) {
               if (err)
-                throw err
+                return next(err)
               return next()
             })        
           }
@@ -104,7 +104,7 @@ module.exports = function (client) {
 
     client.findById(ctx.req.params.id, function (err, result) {
       if (err)
-        throw err
+        return next(err)
       ctx.args.data.budget += result.announcerAccountModel.budget
       return next()
     })
@@ -138,13 +138,13 @@ module.exports = function (client) {
         return next(new Error('Error in Date Times'))
       client.findById(ctx.req.params.id, function (err, result) {
         if (err)
-          throw err
+          return next(err)
         if (ctx.args.data.budget == 0)
           return next(new Error('Error in Budget (Zero)'))  
         var campaign = app.models.campaign
         campaign.find({ where: { 'clientId': ctx.args.data.clientId } }, function (err, campaignList) {
           if (err)
-            throw err
+            return next(err)
           var curBudget = 0
           for (var i = 0; i < campaignList.length; i++)
             curBudget += campaignList[i].budget
@@ -170,7 +170,7 @@ module.exports = function (client) {
     var campaign = app.models.campaign
     campaign.findById(ctx.req.params.fk, function (err, response) {
       if (err)
-        throw err
+        return next(err)
       if (modelInstance.status !== statusJson.started)
         next()
       else
@@ -202,7 +202,7 @@ module.exports = function (client) {
           var campaign = app.models.campaign
           campaign.findById(ctx.req.params.fk, function (err, response) {
             if (err)
-              throw err
+              return next(err)
             if (ctx.args.data.status) {
               var validStatus = [statusJson.stopped, statusJson.unstopped]
               if (validStatus.indexOf(ctx.args.data.status) <= -1)
@@ -240,10 +240,10 @@ module.exports = function (client) {
               callbackFired = true
               client.findById(ctx.req.params.id, function (err, result) {
                 if (err)
-                  throw err
+                  return next(err)
                 campaign.find({ where: { 'clientId': ctx.req.params.id } }, function (err, campaignList) {
                   if (err)
-                    throw err
+                    return next(err)
                   var curBudget = 0
                   for (var i = 0; i < campaignList.length; i++) {
                     if (campaignList[i].id == ctx.req.params.fk)
@@ -257,7 +257,7 @@ module.exports = function (client) {
                   var subcampaign = app.models.subcampaign
                   subcampaign.find({ where: { 'campaignId': ctx.req.params.fk } }, function (err, subcampaignList) {
                     if (err)
-                      throw err
+                      return next(err)
                     var curCampBudget = 0
                     for (var i = 0; i < subcampaignList.length; i++)
                       curCampBudget += subcampaignList[i].minBudget
@@ -471,7 +471,7 @@ module.exports = function (client) {
     }],
     description: 'return refine remaining budget balance',
     http: {
-      path: ':accountHashID/getRefinement',
+      path: '/:accountHashID/getRefinement',
       verb: 'POST',
       status: 200,
       errorStatus: 400
@@ -527,7 +527,7 @@ module.exports = function (client) {
     }],
     description: 'do refining budget balance',
     http: {
-      path: ':accountHashID/doRefinement',
+      path: '/:accountHashID/doRefinement',
       verb: 'POST',
       status: 200,
       errorStatus: 400

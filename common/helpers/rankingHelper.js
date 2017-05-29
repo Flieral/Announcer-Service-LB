@@ -42,6 +42,8 @@ function getApprovedSubcampaigns(callback) {
     for (var i = 0; i < campaigns.length; i++)
       for (var j = 0; j < campaigns[i].subcampaigns.length; j++)
         subcampaignArray.push(campaigns[i].subcampaigns[j])
+    if (subcampaignArray.length == 0)
+      return callback(new Error('zero subcampaigns'), null)
     var subs = applyFilter(subcampaignArray, {
       'order': 'weight DESC'
     })

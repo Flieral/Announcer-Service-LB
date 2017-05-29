@@ -80,13 +80,13 @@ module.exports = function (subcampaign) {
         subcampaigndata.status = statusConfig.finished
       subcampaignInst.updateAttributes(subcampaigndata, function (err, response) {
         if (err)
-          return cb(err, null)
+          return cb(err)
         var filter = {
           include: 'subcampaigns'
         }
         campaign.findById(campaignHashID, filter, function (err, campaignInst) {
           if (err)
-            return cb(err, null)
+            return cb(err)
           if (campaignInst.budget < reduceValue)
             reduceValue = campaignInst.budget
           reduction = campaignInst.budget - reduceValue
@@ -103,16 +103,16 @@ module.exports = function (subcampaign) {
             campaigndata.status = statusConfig.finished
           campaignInst.updateAttributes(campaigndata, function (err, response) {
             if (err)
-              return cb(err, null)
+              return cb(err)
             announcerAccount.findById(accountHashID, function (err, accountInst) {
               if (err)
-                return cb(err, null)
+                return cb(err)
               if (accountInst.budget < reduceValue)
                 reduceValue = accountInst.budget
               reduction = accountInst.budget - reduceValue
               accountInst.updateAttribute('budget', reduction, function (err, response) {
                 if (err)
-                  return cb(err, null)
+                  return cb(err)
                 return cb('successful reduction chain')
               })
             })

@@ -28,7 +28,8 @@ module.exports = {
           or: conditions
         }
       }, function (err, roles) {
-        if (err) throw err
+        if (err)
+          return cb(err)
         var roleNames = roles.map(function (role) {
           return role.name
         })

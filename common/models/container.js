@@ -49,7 +49,7 @@ module.exports = function (container) {
     if (options.isStatic) {
       container.upload(ctx.req, ctx.result, options, function (err, fileObj) {
         if (err)
-          return cb(err, null)
+          return cb(err)
         var fileInfo = fileObj.files.file[0]
         var directory = path.resolve(__dirname + '/../filebank/subFiles/')
         var filePath = directory + '/' + fileInfo.container + '/' + fileInfo.name
@@ -57,25 +57,25 @@ module.exports = function (container) {
           case 0:
             template0Handler.fileValidator(fileInfo, function (err, result) {
               if (err)
-                return cb(err, null)
+                return cb(err)
               utility.base64FileEncoding(filePath, function (err, base64Data) {
                 if (err)
-                  return cb(err, null)
+                  return cb(err)
                 template0Handler.mergeDataWithTemplate(base64Data, app.templates['template0'], function (err, response) {
                   if (err)
-                    return cb(err, null)
+                    return cb(err)
                   var fp = directory + '/' + fileInfo.container + '/' + subcampaignHashId + '.html'
                   var fileURL = CONTAINERS_URL + fileInfo.container + '/download/' + subcampaignHashId + '.html'
                   writeBack(fp, response, function (err, writeObject) {
                     if (err)
-                      return cb(err, null)
+                      return cb(err)
                     updateStatus(subcampaignHashId, fileURL, fp, isStatic, function (err, response) {
                       if (err)
-                        return cb(err, null)
+                        return cb(err)
                       container.removeFile(fileInfo.container, fileInfo.name, function (err) {
                         if (err)
-                          return cb(err, null)
-                        return cb(response, null)
+                          return cb(err)
+                        return cb(response)
                       })
                     })
                   })
@@ -84,38 +84,38 @@ module.exports = function (container) {
             })
             break
           default:
-            return cb(new Error('Default in Switch'), null) 
+            return cb(new Error('Default in Switch')) 
         }
       })
     }
     else {
       if (!data)
-        return cb(new Error('Data is Empty'), null)
+        return cb(new Error('Data is Empty'))
       switch (templateId) {
         case 100:
           template100Handler.inputValidator(data, function (err, result) {
             if (err)
-              return cb(err, null)
+              return cb(err)
             template100Handler.mergeDataWithTemplate(data, app.templates['template100'], function (err, response) {
               if (err)
-                return cb(err, null)
+                return cb(err)
               var directory = path.resolve(__dirname + '/../filebank/subFiles/')
               var fp = directory + '/' + fileInfo.container + '/' + subcampaignHashId + '.html'
               var fileURL = CONTAINERS_URL + fileInfo.container + '/download/' + subcampaignHashId + '.html'
               writeBack(fp, response, function (err, writeObject) {
                 if (err)
-                  return cb(err, null)
+                  return cb(err)
                 updateStatus(subcampaignHashId, fileURL, fp, isStatic, function (err, response) {
                   if (err)
-                    return cb(err, null)
-                  return cb(response, null)
+                    return cb(err)
+                  return cb(response)
                 })
               })
             })
           })
           break
         default:
-          return cb(new Error('Default in Switch'), null) 
+          return cb(new Error('Default in Switch')) 
       }
     }
   }
