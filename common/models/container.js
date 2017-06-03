@@ -45,7 +45,7 @@ module.exports = function (container) {
     })
   }
 
-  container.uploadFile = function (ctx, subcampaignHashId, isStatic, templateId, data, cb) {
+  container.uploadFile = function (ctx, campaignHashId, subcampaignHashId, isStatic, templateId, data, cb) {
     if (options.isStatic) {
       container.upload(ctx.req, ctx.result, options, function (err, fileObj) {
         if (err)
@@ -93,15 +93,15 @@ module.exports = function (container) {
         return cb(new Error('Data is Empty'))
       switch (templateId) {
         case 100:
-          template100Handler.inputValidator(data, function (err, result) {
+          template100Handler.inputValidator(data, function (err) {
             if (err)
               return cb(err)
             template100Handler.mergeDataWithTemplate(data, app.templates['template100'], function (err, response) {
               if (err)
                 return cb(err)
               var directory = path.resolve(__dirname + '/../filebank/subFiles/')
-              var fp = directory + '/' + fileInfo.container + '/' + subcampaignHashId + '.html'
-              var fileURL = CONTAINERS_URL + fileInfo.container + '/download/' + subcampaignHashId + '.html'
+              var fp = directory + '/' + campaignHashId + '/' + subcampaignHashId + '.html'
+              var fileURL = CONTAINERS_URL + campaignHashId + '/download/' + subcampaignHashId + '.html'
               writeBack(fp, response, function (err, writeObject) {
                 if (err)
                   return cb(err)
@@ -127,6 +127,14 @@ module.exports = function (container) {
           type: 'object',
           http: {
             source: 'context'
+          }
+        },
+        {
+          arg: 'campaignHashId',
+          type: 'string',
+          required: true,
+          http: {
+            source: 'query'
           }
         },
         {
