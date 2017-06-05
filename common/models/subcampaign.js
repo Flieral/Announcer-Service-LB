@@ -94,10 +94,10 @@ module.exports = function (subcampaign) {
           campaigndata.budget = reduction
           var allSubcampaignsFinished = false
           var counter = 0
-          for (var i = 0; i < campaignInst.subcampaignModels.length; i++)
-            if (campaignInst.subcampaignModels[i].status === statusConfig.finished)
+          for (var i = 0; i < campaignInst.toJSON().subcampaigns.length; i++)
+            if (campaignInst.toJSON().subcampaigns[i].status === statusConfig.finished)
               counter++
-          if (counter == campaignInst.subcampaignModels.length)
+          if (counter == campaignInst.toJSON().subcampaigns.length)
             allSubcampaignsFinished = true
           if (reduction == 0 || allSubcampaignsFinished)
             campaigndata.status = statusConfig.finished
