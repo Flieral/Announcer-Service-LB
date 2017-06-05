@@ -183,16 +183,21 @@ module.exports = function (campaign) {
     })
   })
 
-  campaign.startManual = function (ctx, campaignHashId, callback) {
-    if (!ctx.args.options.accessToken)
-      return next()
+  campaign.startManual = function (ctx, announcerHashId, campaignHashId, callback) {
+    if (ctx.req.accessToken.userId !== announcerHashId)
+      return callback(new Error('Owner Error'))
     campaign.findById(campaignHashId, function (err, result) {
       if (err)
         return callback(err)
-      if (result.beginningTime >= utility.getUnixTimeStamp() && result.endingTime <= utility.getUnixTimeStamp() && result.status == statusConfig.approved) {
+      if (result.beginningTime <= utility.getUnixTimeStamp() && result.endingTime >= utility.getUnixTimeStamp() && result.status == statusConfig.approved) {
         result.updateAttribute('status', statusConfig.started, function (err, obj) {
           if (err)
             return callback(err)
+          rankingHelper.setRankingAndWeight(obj, function(err, result) {
+            if (err)
+              console.error(err)
+            console.log(result)
+          })
           return callback('Started')
         })
       }
@@ -212,6 +217,14 @@ module.exports = function (campaign) {
         }
       },
       {
+        arg: 'announcerHashId',
+        type: 'string',
+        required: true,
+        http: {
+          source: 'query'
+        }
+      },
+      {
         arg: 'campaignHashId',
         type: 'string',
         required: true,
@@ -220,12 +233,15 @@ module.exports = function (campaign) {
         }
       }
     ],
-    returns: {
-      arg: 'startResponse',
-      type: 'string'
-    },
     http: {
-      verb: 'GET'
+      path: '/startManual',
+      verb: 'GET',
+      status: 200,
+      errorStatus: 400
+    },
+    returns: {
+      arg: 'response',
+      type: 'string'
     }
   })
 
