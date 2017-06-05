@@ -9,10 +9,10 @@ module.exports = {
   mergeDataWithTemplate: function(data, template, callback) {
     const cheerio = require('cheerio')
     const $ = cheerio.load(template)
-    $('FL_Header').text(data.header)
-    $('FL_Holding').text(data.holding)
-    $('FL_Time').text(data.time)
-    $('FL_Subtitle').text(data.subtitle)
+    $('#FL_Header').text(data.header)
+    $('#FL_Holding').text(data.holding)
+    $('#FL_Time').text(data.time)
+    $('#FL_Subtitle').text(data.subtitle)
     return callback(null, $.html())
   }
 }  
