@@ -20,7 +20,7 @@ var subStyleCoeefficient = {
   "Overlay": 4
 }
 
-var subPlanCoefficient = {
+var subPlanCoeefficient = {
   "CPC": 2,
   "CPV": 1
 }
@@ -30,64 +30,73 @@ function getApprovedSubcampaigns(callback) {
   var filter = {
     'where': {
       'status': {
-        inq: [statusConfig.approved, statusConfig.started]
-      },
+        'inq': [statusConfig.approved, statusConfig.started]
+      }
     },
-    'include': 'subcampaigns'
+    'include': {'relation': 'subcampaigns'}
   }
   campaign.find(filter, function (err, campaigns) {
     if (err)
       return callback(err, null)
     var subcampaignArray = []
     for (var i = 0; i < campaigns.length; i++)
-      for (var j = 0; j < campaigns[i].subcampaigns.length; j++)
-        subcampaignArray.push(campaigns[i].subcampaigns[j])
+      for (var j = 0; j < campaigns[i].toJSON().subcampaigns.length; j++)
+        subcampaignArray.push(campaigns[i].toJSON().subcampaigns[j].id)
     if (subcampaignArray.length == 0)
       return callback(new Error('zero subcampaigns'), null)
-    var subs = applyFilter(subcampaignArray, {
-      'order': 'weight DESC'
-    })
-    return callback(null, subs)
+    return callback(null, subcampaignArray)
   })
 }
 
 function calculateRanking(specificSubcampaign, callback) {
-  getApprovedSubcampaigns(function (err, subcampaigns) {
+  getApprovedSubcampaigns(function (err, subcampaignsInst) {
     if (err)
       return callback(err, null)
-    for (var i = 0; i < subcampaigns.length; i++) {
-      if (!specificSubcampaign) {
-        subcampaigns[i].updateAttribute({
-          'ranking': i + 1
-        }, function (err, result) {
-          if (err)
-            return callback(err, null)
-          if (i == subcampaigns.length)
-            return callback(null, 'successful ranking')
-        })
-      } else {
-        if (subcampaigns[i].id == specificSubcampaign.id)
-          return callback(null, i)
+    var subcampaign = app.models.subcampaign
+    subcampaign.find({'where':{'id': {'inq': subcampaignsInst}}, 'order': 'weight DESC'}, function(err, subcampaigns) {
+      if (err)
+        return callback(err, null)
+      for (var i = 0; i < subcampaigns.length; i++) {
+        if (!specificSubcampaign) {
+          var counter = 0;
+          subcampaigns[i].updateAttribute('ranking', i + 1, function (err, result) {
+            if (err)
+              return callback(err, null)
+            counter++
+            if (counter == subcampaigns.length)
+              return callback(null, 'successful ranking')
+          })
+        } else {
+          if (subcampaigns[i].id == specificSubcampaign.id)
+            return callback(null, i)
+        }
       }
-    }
+    })
   })
 }
 
 function calculateWeightCampaignAndSubcampaigns(campaign, writeBackEnable, callback) {
   var duration = campaign.endingTime - campaign.beginningTime
-  var mediaCoeff = mediaStyleCoefficient[campaign.style]
-  campaign.subcampaigns.forEach(function (subcampaign) {
-    var weight = (mediaCoeff / duration) * (subcampaign.price * subcampaign.minBudget * subStyleCoeefficient[subcampaign.style] * subPlanCoeefficient[subcampaign.plan])
-    if (writeBackEnable) {
-      campaign.subcampaign.updateAttribute({
-        'weight': weight
-      }, function (err, result) {
-        if (err)
-          return callback(err, null)
-        return callback(result)
-      })
-    } else
-      return callback(err, weight)
+  var mediaCoeff = mediaStyleCoefficient[campaign.mediaStyle]
+  var subcampaign = app.models.subcampaign
+  subcampaign.find({'where':{'campaignId': campaign.id}}, function(err, subcampaigns) {
+    if (err)
+      return callback(err, null)
+    var counter = 0
+    for (var i = 0; i < subcampaigns.length; i++) {
+      var weight = (mediaCoeff / duration) * (subcampaigns[i].price * subcampaigns[i].minBudget * subStyleCoeefficient[subcampaigns[i].style] * subPlanCoeefficient[subcampaigns[i].plan]) * (1000000000000)
+      if (writeBackEnable) {
+        subcampaigns[i].updateAttribute('weight', weight, function (err, result) {
+          if (err)
+            return callback(err, null)
+          counter++
+          if (counter == subcampaigns.length)
+            return callback(null, 'weight calculated and wrote back')
+        })
+      }
+    }
+    if (!writeBackEnable)
+      return callback(null, 'weight calculated but has noe been wrote back')
   })
 }
 
