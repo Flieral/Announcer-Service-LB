@@ -48,6 +48,7 @@ module.exports = function (campaign) {
             return next(new Error('Error in Budget (Subcampaign)'))
           ctx.args.data.clientId = ctx.args.options.accessToken.userId
           ctx.args.data.campaignId = ctx.req.params.id
+          ctx.args.data.status = statusConfig.created
           ctx.args.data.weight = 0
           var settingToCreate = {
             priority: "Average",
@@ -114,7 +115,7 @@ module.exports = function (campaign) {
     campaign.findById(ctx.ctorArgs.id, function (err, result) {
       if (err)
         return next(err)
-      result.updateAttribute('status', statusConfig.created, function (err, response) {
+      result.updateAttribute('status', statusConfig.pending, function (err, response) {
         if (err)
           return next(err)
         return next()
@@ -147,7 +148,7 @@ module.exports = function (campaign) {
             break
           }
         }
-        if (approvedCounter == subcampaignList.length)
+        if (result.status !== statusConfig.started && approvedCounter == subcampaignList.length)
           status = statusConfig.approved
         result.updateAttribute('status', status, function (err, response) {
           if (err)
@@ -155,9 +156,10 @@ module.exports = function (campaign) {
           if (result.status === statusConfig.started || result.status === status.approved) {
             rankingHelper.setRankingAndWeight(result, function(err, result) {
               if (err)
-                return next(err)
-              return next()
+                console.error(err)
+              console.log(result)
             })
+            return next()
           }
           else 
             return next()
@@ -174,9 +176,10 @@ module.exports = function (campaign) {
         return next(err)
       rankingHelper.recalculateRankingAndWeight(function(err, result) {
         if (err)
-          return next(err)
-        return next()
+          console.error(err)
+        console.log(result)
       })
+      return next()
     })
   })
 

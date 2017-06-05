@@ -185,9 +185,10 @@ module.exports = function (client) {
         return next(err)
       rankingHelper.recalculateRankingAndWeight(function(err, result) {
         if (err)
-          return next(err)
-        return next()
+          console.error(err)
+        console.log(result)
       })
+      return next()
     })
   })
   
@@ -211,7 +212,7 @@ module.exports = function (client) {
                 return next(new Error('Stopping Only Started Campaigns are Allowed'))
               if (ctx.args.data.status !== statusJson.unstopped && response.status === statusJson.stopped)
                 return next(new Error('Unstopping Only Stopped Campaigns are Allowed'))
-              else
+              if (ctx.args.data.status === statusJson.unstopped && response.status === statusJson.stopped)
                 ctx.args.data.status = statusJson.started
             }
 
@@ -282,7 +283,7 @@ module.exports = function (client) {
   })
 
   client.afterRemote('prototype.__updateById__campaigns', function (ctx, modelInstance, next) {
-    function changeCampaignStatus(campaignId, status, callback) {
+    function changeSubcampaignStatus(campaignId, status, callback) {
       var subcampaign = app.models.subcampaign
       subcampaign.updateAll({'where': {'campaignId': campaignId}}, {'status': status}, function(err, result, count) {
         if (err)
@@ -291,25 +292,27 @@ module.exports = function (client) {
       })
     }
     if (modelInstance.status === statusJson.started) {
-      changeCampaignStatus(modelInstance.id, statusJson.approved, function(err, result) {
+      changeSubcampaignStatus(modelInstance.id, statusJson.approved, function(err, result) {
         if (err)
           return next(err)
         rankingHelper.setRankingAndWeight(modelInstance, function(err, result) {
           if (err)
-            return next(err)
-          return next()
-        })        
+            console.error(err)
+          console.log(result)
+        })
+        return next()
       })
     }
     else if (modelInstance.status === statusJson.stopped) {
-      changeCampaignStatus(modelInstance.id, statusJson.stopped, function(err, result) {
+      changeSubcampaignStatus(modelInstance.id, statusJson.stopped, function(err, result) {
         if (err)
           return next(err)
         rankingHelper.recalculateRankingAndWeight(function(err, result) {
           if (err)
-            return next(err)
-          return next()
-        })        
+            console.error(err)
+          console.log(result)
+        })
+        return next()
       })
     }
     else
@@ -432,7 +435,7 @@ module.exports = function (client) {
         return cb(err)
       var finishedCampaignsCounter = 0
       for (var i = 0; i < result.campaigns.length; i++)
-        if (result.campaigns[i].status === statusJson.finished)
+        if (result.toJSON().campaigns[i].status === statusJson.finished)
           finishedCampaignsCounter++
       if (finishedCampaignsCounter == result.campaigns.length) {
         var subcampaign = app.models.subcampaign
@@ -497,10 +500,10 @@ module.exports = function (client) {
       var totalBudget = 0
       for (var i = 0; i < campaigns.length; i++) {
         var campBudget = 0
-        for (var j = 0; j < campaigns[i].subcampaigns.length; j++)
-          campBudget += campaigns[i].subcampaigns[j].minBudget
+        for (var j = 0; j < campaigns[i].toJSON().subcampaigns.length; j++)
+          campBudget += campaigns[i].toJSON().subcampaigns[j].minBudget
         totalBudget += campBudget
-        campaigns[i].updateAttribute({'budget': campBudget}, function(err, result) {
+        campaigns[i].updateAttribute('budget', campBudget, function(err, result) {
           if (err)
             return cb(err)
           campCounter++
