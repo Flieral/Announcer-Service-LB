@@ -6,7 +6,6 @@
     "validateUpsert": true
   },
   "hidden": [
-    "fileURL"
   ],
   "properties": {
     "minBudget": {
@@ -30,7 +29,7 @@
       "required": true
     },
     "price": {
-      "type": "string",
+      "type": "number",
       "required": true
     },
     "fileURL": {
