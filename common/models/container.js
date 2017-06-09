@@ -121,7 +121,7 @@ module.exports = function (container) {
                           container.removeFile(fileInfo.container, fileInfo.name, function (err) {
                             if (err)
                               return cb(err)
-                            return cb(response)
+                            return cb(null, response)
                           })
                         })
                       })
@@ -154,7 +154,7 @@ module.exports = function (container) {
                     updateStatus(subcampaignHashId, fileURL, fp, isStatic, function (err, response) {
                       if (err)
                         return cb(err)
-                      return cb(response)
+                      return cb(null, response)
                     })
                   })
                 })

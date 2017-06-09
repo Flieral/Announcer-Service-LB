@@ -113,7 +113,7 @@ module.exports = function (subcampaign) {
               accountInst.updateAttribute('budget', reduction, function (err, response) {
                 if (err)
                   return cb(err)
-                return cb('successful reduction chain')
+                return cb(null, 'successful reduction chain')
               })
             })
           })

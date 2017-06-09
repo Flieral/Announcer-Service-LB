@@ -133,7 +133,6 @@ module.exports = function (client) {
     else {
       ctx.args.data.clientId = ctx.args.options.accessToken.userId
       ctx.args.data.status = statusJson.pending
-      ctx.args.data.message = 'Campaign Pending Approval'
       if (!(ctx.args.data.endingTime > ctx.args.data.beginningTime + 604800000) || !(ctx.args.data.beginningTime > utility.getUnixTimeStamp()))
         return next(new Error('Error in Date Times'))
       client.findById(ctx.req.params.id, function (err, result) {
@@ -454,7 +453,7 @@ module.exports = function (client) {
           if (remaining == 0)
             return cb(new Error('no remaining money budget. balance is 0.'))
           else
-            return cb(remaining)
+            return cb(null, remaining)
         })
       }
       else {
@@ -511,7 +510,7 @@ module.exports = function (client) {
             client.announcerAccountModel.update({'budget': totalBudget}, function(err, result) {
               if (err)
                 return cb(err)
-              return cb('refinement done')
+              return cb(null, 'refinement done')
             })
           }
         })

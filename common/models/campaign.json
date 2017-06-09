@@ -36,10 +36,6 @@
     "mediaStyle": {
       "type": "string",
       "required": true
-    },
-    "message": {
-      "type": "string",
-      "required": false
     }
   },
   "validations": [],

@@ -198,7 +198,7 @@ module.exports = function (campaign) {
               console.error(err)
             console.log(result)
           })
-          return callback('Started')
+          return callback(null, 'Started')
         })
       }
       else {
