@@ -503,10 +503,14 @@ module.exports = function (client) {
             return cb(err)
           campCounter++
           if (campCounter == campaigns.length) {
-            client.announcerAccountModel.update({'budget': totalBudget}, function(err, result) {
+            client.findById(accountHashId, function(err, clientInst) {
               if (err)
                 return cb(err)
-              return cb(null, 'refinement done')
+              clientInst.announcerAccount.update({'budget': totalBudget}, function(err, result) {
+                if (err)
+                  return cb(err)
+                return cb(null, 'refinement done')
+              })              
             })
           }
         })

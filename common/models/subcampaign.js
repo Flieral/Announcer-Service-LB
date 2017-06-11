@@ -66,7 +66,7 @@ module.exports = function (subcampaign) {
 
   subcampaign.reduceChain = function (subcampaignHashId, campaignHashId, accountHashId, reduceValue, cb) {
     var campaign = app.models.campaign
-    var announcerAccount = app.models.announcerAccount
+    var client = app.models.client
     var reduction = 0
     subcampaign.findById(subcampaignHashId, function (err, subcampaignInst) {
       if (err)
@@ -104,13 +104,13 @@ module.exports = function (subcampaign) {
           campaignInst.updateAttributes(campaigndata, function (err, response) {
             if (err)
               return cb(err)
-            announcerAccount.findById(accountHashId, function (err, accountInst) {
+            client.findById(accountHashId, function (err, clientInst) {
               if (err)
                 return cb(err)
-              if (accountInst.budget < reduceValue)
-                reduceValue = accountInst.budget
-              reduction = accountInst.budget - reduceValue
-              accountInst.updateAttribute('budget', reduction, function (err, response) {
+              if (clientInst.announcerAccountModel.budget < reduceValue)
+                reduceValue = clientInst.announcerAccountModel.budget
+              reduction = clientInst.announcerAccountModel.budget - reduceValue
+              clientInst.announcerAccount.update({'budget': reduction}, function (err, response) {
                 if (err)
                   return cb(err)
                 var model = {
