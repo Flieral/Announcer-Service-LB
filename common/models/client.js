@@ -341,7 +341,6 @@ module.exports = function (client) {
       if (err) return res.sendStatus(404)
       user.updateAttribute('password', req.body.password, function (err, user) {
         if (err) return res.sendStatus(404)
-        console.log('> password reset processed successfully');
         res.render('response', {
           title: 'Password reset success',
           content: 'Your password has been reset successfully',
@@ -397,9 +396,6 @@ module.exports = function (client) {
 
     userInstance.verify(options, function (err, response, next) {
       if (err) return next1(err)
-
-      console.log('> verification email sent:', response)
-
       context.res.render('response', {
         title: 'Signed up successfully',
         content: 'Please check your email and click on the verification link before logging in.',
@@ -425,11 +421,11 @@ module.exports = function (client) {
     })
   })
 
-  client.getRefinement = function (accountHashID, cb) {
+  client.getRefinement = function (accountHashId, cb) {
     var filter = {
       include: 'campaigns'
     }
-    client.findById(accountHashID, filter, function(err, result) {
+    client.findById(accountHashId, filter, function(err, result) {
       if (err)
         return cb(err)
       var finishedCampaignsCounter = 0
@@ -440,7 +436,7 @@ module.exports = function (client) {
         var subcampaign = app.models.subcampaign
         var subFilter = {
           where: {
-            'clientId': accountHashID
+            'clientId': accountHashId
           }
         }
         subcampaign.find(subFilter, function(err, subcampainList) {
@@ -464,7 +460,7 @@ module.exports = function (client) {
 
   client.remoteMethod('getRefinement', {
     accepts: [{
-      arg: 'accountHashID',
+      arg: 'accountHashId',
       type: 'string',
       required: true,
       http: {
@@ -473,7 +469,7 @@ module.exports = function (client) {
     }],
     description: 'return refine remaining budget balance',
     http: {
-      path: '/:accountHashID/getRefinement',
+      path: '/:accountHashId/getRefinement',
       verb: 'POST',
       status: 200,
       errorStatus: 400
@@ -484,11 +480,11 @@ module.exports = function (client) {
     }
   })
 
-  client.doRefinement = function (accountHashID, cb) {
+  client.doRefinement = function (accountHashId, cb) {
     var campaign = app.models.campaign
     var filter = {
       'where': {
-        'clientId': accountHashID
+        'clientId': accountHashId
       },
       'include': 'subcampaigns'
     }
@@ -520,7 +516,7 @@ module.exports = function (client) {
 
   client.remoteMethod('doRefinement', {
     accepts: [{
-      arg: 'accountHashID',
+      arg: 'accountHashId',
       type: 'string',
       required: true,
       http: {
@@ -529,7 +525,7 @@ module.exports = function (client) {
     }],
     description: 'do refining budget balance',
     http: {
-      path: '/:accountHashID/doRefinement',
+      path: '/:accountHashId/doRefinement',
       verb: 'POST',
       status: 200,
       errorStatus: 400

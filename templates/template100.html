@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-    <head> 
+    <head>
         <title>Content View</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <style media="screen" type="text/css">
@@ -15,16 +15,49 @@
         <script>
             var userId = '';
             var contentId = '';
-            function setInfo(userHashId, contentHashId) {
-                userId = userHashId;
-                contentId = contentHashId;
-            }
-
+            var subcampaignHashId = '';
+            var campaignHashId = '';
+            var announcerHashId = '';
+            var placementHashId = '';
+            var applicationHashId = '';
+            var publisherHashId = '';
+            function setInfo(_userHashId, _subcampaignHashId, _campaignHashId, _announcerHashId, _placementHashId, _applicationHashId, _publisherHashId) {
+                userId = _userHashId;
+                contentId = _subcampaignHashId;
+                subcampaignHashId = _subcampaignHashId;
+                campaignHashId = _campaignHashId;
+                announcerHashId = _announcerHashId;
+                placementHashId = _placementHashId;
+                applicationHashId = _applicationHashId;
+                publisherHashId = _publisherHashId;
+                return true;
+            };
+            function clickedFunc() {
+              var myActionType = 'clickedPlacement';
+              var myActionParameters = {
+                  'userId': userId,
+                  'subcampaignHashId': subcampaignHashId,
+                  'campaignHashId': campaignHashId,
+                  'announcerHashId': announcerHashId,
+                  'placementHashId': placementHashId,
+                  'applicationHashId': applicationHashId,
+                  'publisherHashId': publisherHashId,
+                  'time': Math.floor((new Date).getTime())
+              };
+              window.webkit.messageHandlers.FlieralSDK.postMessage({"function":myActionType, "input": myActionParameters});
+            };
+            function closedFunc() {
+              var myActionType = 'removePlacement';
+              var myActionParameters = {
+                  'blob': 'blob'
+              };
+              window.webkit.messageHandlers.myApp.postMessage({"function":myActionType, "input": myActionParameters});
+            };
             $(document).ready(function () {
                 $('#btn1, #btn2, #btn3, btn4').click(function (e) {
                     e.preventDefault();
                     var interactionType = '';
-                    var baseUrl = 'http://0.0.0.0:3015/api/interactions/inputInteractions';
+                    var baseUrl = 'http://192.168.1.3:3015/api/interactions/inputReactions';
 
                     if (this.id === 'btn1')
                         interactionType = 'liked'
@@ -47,16 +80,12 @@
                             elem.style.opacity = 0.5;
                         },
                         error: function (result) {
-                            var myAppName = 'FlieralSDK';
                             var myActionType = 'saveCache';
                             var myActionParameters = {
                                 'method': 'POST',
                                 'url': url
                             };
-                            var jsonString = (JSON.stringify(myActionParameters));
-                            var escapedJsonParameters = escape(jsonString);
-                            var url = myAppName + '://' + myActionType + "#" + escapedJsonParameters;
-                            document.location.href = url;
+                            window.webkit.messageHandlers.FlieralSDK.postMessage({"function":myActionType, "input": myActionParameters});
                         }
                     });
                 });
@@ -91,8 +120,8 @@
         <footer style="position: absolute; left: 0; bottom: 0; right: 0; padding-bottom: 1cm; padding-top: 1.5cm">
             <div class="col-xs-10 col-xs-offset-1">
                 <div class="row">
-                    <a href="" type="button" class="btn btn-default btn-sm col-xs-4 col-xs-offset-0" style="width:20%;">Open</a>
-                    <button type="button" class="btn btn-default btn-sm col-xs-4 col-xs-offset-1" style="width:20%;">Close</button>
+                    <button type="button" class="btn btn-default btn-sm col-xs-4 col-xs-offset-0" onClick="clickedFunc();" style="width:20%;">Open</button>
+                    <button type="button" class="btn btn-default btn-sm col-xs-4 col-xs-offset-1" onclick="closedFunc();" style="width:20%;">Close</button>
                     <div class="col-xs-4 col-xs-offset-2">
                         <h6 class="text-center" style="margin: auto;" align="left"><small>Powered by<br/>Flieral, Inc.</small></h6>
                     </div>

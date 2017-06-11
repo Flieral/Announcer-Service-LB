@@ -64,11 +64,11 @@ module.exports = function (subcampaign) {
     })
   })
 
-  subcampaign.reduceChain = function (subcampaignHashID, campaignHashID, accountHashID, reduceValue, cb) {
+  subcampaign.reduceChain = function (subcampaignHashId, campaignHashId, accountHashId, reduceValue, cb) {
     var campaign = app.models.campaign
     var announcerAccount = app.models.announcerAccount
     var reduction = 0
-    subcampaign.findById(subcampaignHashID, function (err, subcampaignInst) {
+    subcampaign.findById(subcampaignHashId, function (err, subcampaignInst) {
       if (err)
         return cb(err, null)
       if (subcampaignInst.minBudget < reduceValue)
@@ -84,7 +84,7 @@ module.exports = function (subcampaign) {
         var filter = {
           include: 'subcampaigns'
         }
-        campaign.findById(campaignHashID, filter, function (err, campaignInst) {
+        campaign.findById(campaignHashId, filter, function (err, campaignInst) {
           if (err)
             return cb(err)
           if (campaignInst.budget < reduceValue)
@@ -104,7 +104,7 @@ module.exports = function (subcampaign) {
           campaignInst.updateAttributes(campaigndata, function (err, response) {
             if (err)
               return cb(err)
-            announcerAccount.findById(accountHashID, function (err, accountInst) {
+            announcerAccount.findById(accountHashId, function (err, accountInst) {
               if (err)
                 return cb(err)
               if (accountInst.budget < reduceValue)
@@ -113,7 +113,11 @@ module.exports = function (subcampaign) {
               accountInst.updateAttribute('budget', reduction, function (err, response) {
                 if (err)
                   return cb(err)
-                return cb(null, 'successful reduction chain')
+                var model = {
+                  reduceValue: reduceValue,
+                  message: 'successful reduction chain'
+                }
+                return cb(null, model)
               })
             })
           })
@@ -124,21 +128,21 @@ module.exports = function (subcampaign) {
 
   subcampaign.remoteMethod('reduceChain', {
     accepts: [{
-      arg: 'subcampaignHashID',
+      arg: 'subcampaignHashId',
       type: 'string',
       required: true,
       http: {
         source: 'query'
       }
     }, {
-      arg: 'campaignHashID',
+      arg: 'campaignHashId',
       type: 'string',
       required: true,
       http: {
         source: 'query'
       }
     }, {
-      arg: 'accountHashID',
+      arg: 'accountHashId',
       type: 'string',
       required: true,
       http: {

@@ -165,6 +165,12 @@
       "principalId": "admin",
       "permission": "ALLOW",
       "property": "doRefinement"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "ALLOW",
+      "property": "__findById__accessTokens"
     }
   ],
   "methods": {}
