@@ -51,7 +51,7 @@
               var myActionParameters = {
                   'blob': 'blob'
               };
-              window.webkit.messageHandlers.myApp.postMessage({"function":myActionType, "input": myActionParameters});
+              window.webkit.messageHandlers.FlieralSDK.postMessage({"function":myActionType, "input": myActionParameters});
             };
             $(document).ready(function () {
                 $('#btn1, #btn2, #btn3, btn4').click(function (e) {
