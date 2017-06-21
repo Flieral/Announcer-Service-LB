@@ -99,6 +99,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getAllSubcampaigns"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "admin",
       "permission": "ALLOW",
       "property": "reduceChain"

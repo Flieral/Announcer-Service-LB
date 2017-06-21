@@ -169,4 +169,53 @@ module.exports = function (subcampaign) {
     }
   })
 
+  subcampaign.getAllSubcampaigns = function (ctx, accountHashId, filter, cb) {
+    if (!ctx.req.accessToken)
+      return cb(new Error('missing accessToken'))
+
+    if (ctx.req.accessToken.userId !== accountHashId)
+      return cb(new Error('missmatched accountHashId'))
+
+    subcampaign.find(filter, function(err, result) {
+      if (err)
+        return cb(err, null)
+      return cb(null, result)
+    })
+  }
+
+  subcampaign.remoteMethod('getAllSubcampaigns', {
+    accepts: [{
+      arg: 'ctx',
+      type: 'object',
+      http: {
+        source: 'context'
+      }
+    }, {
+      arg: 'accountHashId',
+      type: 'string',
+      required: true,
+      http: {
+        source: 'query'
+      }
+    }, {
+      arg: 'filter',
+      type: 'object',
+      required: true,
+      http: {
+        source: 'query'
+      }
+    }],
+    description: 'get all subcampaigns of related account',
+    http: {
+      path: '/getAllSubcampaigns',
+      verb: 'GET',
+      status: 200,
+      errorStatus: 400
+    },
+    returns: {
+      type: 'object',
+      root: true
+    }
+  })
+
 }
