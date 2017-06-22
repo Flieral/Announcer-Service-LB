@@ -396,12 +396,7 @@ module.exports = function (client) {
 
     userInstance.verify(options, function (err, response, next) {
       if (err) return next1(err)
-      context.res.render('response', {
-        title: 'Signed up successfully',
-        content: 'Please check your email and click on the verification link before logging in.',
-        redirectTo: '/',
-        redirectToLinkText: 'Log in'
-      })
+      return next1()
     })
   })
 
