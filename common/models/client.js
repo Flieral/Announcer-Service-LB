@@ -422,6 +422,12 @@ module.exports = function (client) {
   })
 
   client.getRefinement = function (accountHashId, cb) {
+    if (!ctx.req.accessToken)
+      return cb(new Error('missing accessToken'))
+
+    if (ctx.req.accessToken.userId !== accountHashId)
+      return cb(new Error('missmatched accountHashId'))
+
     var filter = {
       include: 'campaigns'
     }

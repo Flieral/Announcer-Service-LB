@@ -170,7 +170,7 @@ module.exports = function (campaign) {
 
   campaign.afterRemote('prototype.__destroyById__subcampaigns', function (ctx, modelInstance, next) {
     var container = '' + ctx.ctorArgs.id
-    var file = '' + ctx.args.fk
+    var file = '' + ctx.args.fk + '.html'
     app.models.container.removeFile(container, file, function (err) {
       if (err)
         return next(err)
