@@ -416,7 +416,7 @@ module.exports = function (client) {
     })
   })
 
-  client.getRefinement = function (accountHashId, cb) {
+  client.getRefinement = function (ctx, accountHashId, cb) {
     if (!ctx.req.accessToken)
       return cb(new Error('missing accessToken'))
 
@@ -461,9 +461,14 @@ module.exports = function (client) {
 
   client.remoteMethod('getRefinement', {
     accepts: [{
+      arg: 'ctx',
+      type: 'object',
+      http: {
+        source: 'context'
+      }
+    }, {
       arg: 'accountHashId',
       type: 'string',
-      required: true,
       http: {
         source: 'query'
       }
@@ -523,7 +528,6 @@ module.exports = function (client) {
     accepts: [{
       arg: 'accountHashId',
       type: 'string',
-      required: true,
       http: {
         source: 'query'
       }
